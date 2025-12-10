@@ -134,7 +134,7 @@ export function TourList({
           "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
         )}
       >
-        {tours.map((tour) => (
+        {tours.map((tour, index) => (
           <TourCard
             key={tour.contentid}
             tour={tour}
@@ -142,6 +142,7 @@ export function TourList({
             onClick={onCardClick}
             onMouseEnter={onCardHover}
             onMouseLeave={onCardHoverLeave}
+            priority={index < 6}
           />
         ))}
       </div>

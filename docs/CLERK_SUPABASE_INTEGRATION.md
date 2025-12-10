@@ -27,7 +27,7 @@ Clerk와 Supabase의 네이티브 통합을 사용하면:
 
 ### 2. 환경 변수 설정
 
-`.env.local` 파일에 다음 환경 변수를 추가하세요:
+`.env` 파일에 다음 환경 변수를 추가하세요:
 
 ```bash
 # Clerk Authentication

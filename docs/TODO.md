@@ -494,14 +494,33 @@
 
 ## Phase 6: 최적화 & 배포
 
-- [ ] 이미지 최적화
-  - [ ] `next.config.ts` 외부 도메인 설정
-    - [ ] 한국관광공사 이미지 도메인 추가
-    - [ ] 네이버 지도 이미지 도메인 추가
-  - [ ] Next.js Image 컴포넌트 사용 확인
-    - [ ] priority 속성 (above-the-fold)
-    - [ ] lazy loading (below-the-fold)
-    - [ ] responsive sizes 설정
+- [x] 이미지 최적화
+  - [x] `next.config.ts` 외부 도메인 설정
+    - [x] 한국관광공사 이미지 도메인 추가 (`tong.visitkorea.or.kr`, `www.visitkorea.or.kr`)
+    - [x] 네이버 지도 이미지 도메인 확인 (JavaScript API만 사용하므로 불필요)
+    - [x] 기본 이미지 placeholder 도메인 추가 (`images.unsplash.com`, `via.placeholder.com`)
+  - [x] Next.js Image 컴포넌트 사용 확인
+    - [x] priority 속성 (above-the-fold)
+      - [x] `detail-info.tsx` 대표 이미지: `priority` 적용
+      - [x] `tour-card.tsx` 첫 6개 카드: `priority={index < 6}` 적용
+      - [x] `image-modal.tsx` 초기 이미지: `priority={index === initialIndex}` 적용
+    - [x] lazy loading (below-the-fold)
+      - [x] `tour-card.tsx`: 기본 lazy loading (priority가 아닌 경우)
+      - [x] `image-slider.tsx`: `loading={index < 3 ? "eager" : "lazy"}` 적용
+    - [x] responsive sizes 설정
+      - [x] `tour-card.tsx`: `sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"`
+      - [x] `detail-info.tsx`: `sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 896px"`
+      - [x] `image-slider.tsx`: `sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 40vw, 33vw"`
+      - [x] `image-modal.tsx`: `sizes="95vw"`
+  - [x] 이미지 품질 최적화
+    - [x] 썸네일 이미지 (`tour-card.tsx`): `quality={75}` (낮은 품질로 용량 절감)
+    - [x] 상세 이미지 (`detail-info.tsx`): `quality={85}` (높은 품질 유지)
+    - [x] 갤러리 이미지 (`image-slider.tsx`): `quality={80}` (중간 품질)
+    - [x] 모달 이미지 (`image-modal.tsx`): `quality={90}` (최고 품질)
+  - [x] 이미지 에러 처리 개선
+    - [x] `tour-card.tsx`: 이미지 로드 실패 시 기본 이미지로 대체 (이미 구현됨)
+    - [x] `image-slider.tsx`: 이미지 로드 실패 시 에러 메시지 표시 추가
+    - [x] `image-modal.tsx`: 이미지 로드 실패 시 에러 메시지 표시 추가
 - [ ] 전역 에러 핸들링
   - [ ] `app/error.tsx` 생성
   - [ ] `app/global-error.tsx` 생성

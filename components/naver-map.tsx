@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { TourItem } from "@/lib/types/tour";
 import { katecToWgs84 } from "@/lib/utils/coordinates";
 import { getRegionCenter, getRegionZoom } from "@/lib/constants/map";
-import { getEnv } from "@/lib/env";
+// getEnv는 사용하지 않음 (환경변수가 없어도 지도 기능만 비활성화)
 import { cn } from "@/lib/utils";
 import { getMarkerColorByTypeId } from "@/lib/constants/tour-types";
 import { Loader2, MapPin, Navigation, Locate } from "lucide-react";
@@ -81,7 +81,19 @@ function loadNaverMapsScript(): Promise<void> {
       return;
     }
 
-    const clientId = getEnv("NEXT_PUBLIC_NAVER_MAP_CLIENT_ID");
+    // 네이버 지도 클라이언트 ID 가져오기 (선택사항)
+    const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID;
+    if (!clientId) {
+      console.warn(
+        "⚠️ NEXT_PUBLIC_NAVER_MAP_CLIENT_ID가 설정되지 않았습니다. 네이버 지도 기능이 비활성화됩니다."
+      );
+      reject(
+        new Error(
+          "NEXT_PUBLIC_NAVER_MAP_CLIENT_ID 환경변수가 설정되지 않았습니다."
+        )
+      );
+      return;
+    }
     const scriptId = "naver-maps-script";
     
     // 이미 스크립트가 존재하는 경우
@@ -225,7 +237,17 @@ export function NaverMap({
           err instanceof Error
             ? err.message
             : "지도를 초기화하는 중 오류가 발생했습니다.";
-        setError(errorMessage);
+        // 환경변수 관련 에러인 경우 더 친절한 메시지 제공
+        if (
+          errorMessage.includes("NEXT_PUBLIC_NAVER_MAP_CLIENT_ID") ||
+          errorMessage.includes("환경변수")
+        ) {
+          setError(
+            "네이버 지도 환경변수가 설정되지 않았습니다. 지도 기능을 사용하려면 NEXT_PUBLIC_NAVER_MAP_CLIENT_ID를 설정해주세요."
+          );
+        } else {
+          setError(errorMessage);
+        }
         setIsLoading(false);
         console.error("지도 초기화 오류:", err);
       }

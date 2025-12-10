@@ -29,6 +29,8 @@ interface TourCardProps {
   onMouseEnter?: (contentId: string) => void;
   /** 마우스 나감 핸들러 (지도 연동용, 선택 사항) */
   onMouseLeave?: () => void;
+  /** 이미지 priority 속성 (above-the-fold 이미지용) */
+  priority?: boolean;
 }
 
 /**
@@ -48,6 +50,7 @@ export const TourCard = memo(function TourCard({
   onClick,
   onMouseEnter,
   onMouseLeave,
+  priority = false,
 }: TourCardProps) {
   const {
     contentid,
@@ -116,6 +119,8 @@ export const TourCard = memo(function TourCard({
           fill
           className="object-cover transition-transform duration-200 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={priority}
+          quality={75}
           onError={() => {
             // 이미지 로드 실패 시 기본 이미지로 대체
             setImageError(true);

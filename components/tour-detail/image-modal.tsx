@@ -49,6 +49,7 @@ export function ImageModal({
   initialIndex = 0,
 }: ImageModalProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   // 모달이 열릴 때 초기 인덱스 설정
   useEffect(() => {
@@ -78,6 +79,10 @@ export function ImageModal({
   if (!images || images.length === 0) {
     return null;
   }
+
+  const handleImageError = (index: number) => {
+    setImageErrors((prev) => new Set(prev).add(index));
+  };
 
   const currentImage = images[currentIndex];
 
@@ -115,23 +120,33 @@ export function ImageModal({
             initialSlide={initialIndex}
             className="w-full h-full"
           >
-            {images.map((image, index) => (
-              <SwiperSlide key={`${image.contentid}-${index}`}>
-                <div className="relative w-full h-full flex items-center justify-center p-4">
-                  <div className="relative w-full h-full max-w-7xl max-h-[90vh]">
-                    <Image
-                      src={image.originimgurl || image.smallimageurl}
-                      alt={image.imgname || `${title} 이미지 ${index + 1}`}
-                      fill
-                      className="object-contain"
-                      sizes="95vw"
-                      priority={index === initialIndex}
-                      quality={90}
-                    />
+            {images.map((image, index) => {
+              const hasError = imageErrors.has(index);
+              return (
+                <SwiperSlide key={`${image.contentid}-${index}`}>
+                  <div className="relative w-full h-full flex items-center justify-center p-4">
+                    <div className="relative w-full h-full max-w-7xl max-h-[90vh]">
+                      {!hasError ? (
+                        <Image
+                          src={image.originimgurl || image.smallimageurl}
+                          alt={image.imgname || `${title} 이미지 ${index + 1}`}
+                          fill
+                          className="object-contain"
+                          sizes="95vw"
+                          priority={index === initialIndex}
+                          quality={90}
+                          onError={() => handleImageError(index)}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-muted-foreground">
+                          <p className="text-sm">이미지를 불러올 수 없습니다</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
 
           {/* 네비게이션 버튼 (이미지가 2개 이상일 때만 표시) */}

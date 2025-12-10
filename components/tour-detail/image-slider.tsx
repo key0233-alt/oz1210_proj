@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Keyboard } from "swiper/modules";
@@ -44,10 +44,15 @@ export function ImageSlider({
   initialSlide = 0,
 }: ImageSliderProps) {
   const swiperRef = useRef<SwiperType | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   if (!images || images.length === 0) {
     return null;
   }
+
+  const handleImageError = (index: number) => {
+    setImageErrors((prev) => new Set(prev).add(index));
+  };
 
   return (
     <div className="relative w-full" aria-label="이미지 갤러리">
@@ -90,29 +95,39 @@ export function ImageSlider({
         touchRatio={1}
         threshold={10}
       >
-        {images.map((image, index) => (
-          <SwiperSlide key={`${image.contentid}-${index}`}>
-            <div
-              className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted cursor-pointer group"
-              onClick={() => onImageClick?.(index)}
-              role="button"
-              tabIndex={0}
-              aria-label={`${title} 이미지 ${index + 1} 보기`}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onImageClick?.(index);
-                }
-              }}
-            >
-              <Image
-                src={image.originimgurl || image.smallimageurl}
-                alt={image.imgname || `${title} 이미지 ${index + 1}`}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 40vw, 33vw"
-                loading={index < 3 ? "eager" : "lazy"}
-              />
+        {images.map((image, index) => {
+          const hasError = imageErrors.has(index);
+          return (
+            <SwiperSlide key={`${image.contentid}-${index}`}>
+              <div
+                className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted cursor-pointer group"
+                onClick={() => onImageClick?.(index)}
+                role="button"
+                tabIndex={0}
+                aria-label={`${title} 이미지 ${index + 1} 보기`}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onImageClick?.(index);
+                  }
+                }}
+              >
+                {!hasError ? (
+                  <Image
+                    src={image.originimgurl || image.smallimageurl}
+                    alt={image.imgname || `${title} 이미지 ${index + 1}`}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 40vw, 33vw"
+                    loading={index < 3 ? "eager" : "lazy"}
+                    quality={80}
+                    onError={() => handleImageError(index)}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <p className="text-sm">이미지를 불러올 수 없습니다</p>
+                  </div>
+                )}
               {/* 호버 시 확대 아이콘 표시 */}
               <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover:bg-black/20">
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -135,7 +150,8 @@ export function ImageSlider({
               </div>
             </div>
           </SwiperSlide>
-        ))}
+          );
+        })}
       </Swiper>
 
       {/* 커스텀 네비게이션 버튼 */}
