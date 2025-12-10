@@ -10,7 +10,7 @@
 
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TourItem } from "@/lib/types/tour";
 import { TourList } from "@/components/tour-list";
@@ -85,11 +85,6 @@ export function HomeLayout({
     enabled: paginationMode === "infinite" && !error,
   });
 
-  // elementRef를 scrollTriggerRef에 연결
-  if (elementRef.current && scrollTriggerRef.current !== elementRef.current) {
-    scrollTriggerRef.current = elementRef.current as HTMLDivElement;
-  }
-
   // 카드 클릭 핸들러 (지도로 이동)
   const handleCardClick = useCallback((contentId: string) => {
     setSelectedContentId(contentId);
@@ -110,6 +105,11 @@ export function HomeLayout({
     }, 300);
   }, []);
 
+  // 재시도 핸들러
+  const handleRetry = useCallback(() => {
+    router.refresh();
+  }, [router]);
+
   return (
     <>
       {/* 데스크톱 레이아웃: 분할 (≥1024px) */}
@@ -124,6 +124,7 @@ export function HomeLayout({
               searchKeyword={searchKeyword}
               selectedContentId={selectedContentId}
               onCardClick={handleCardClick}
+              onRetry={handleRetry}
             />
           </div>
           {/* 페이지네이션 */}
@@ -137,7 +138,7 @@ export function HomeLayout({
                 onPageChange={handlePageChange}
                 mode={paginationMode}
                 onModeChange={setPaginationMode}
-                scrollTriggerRef={paginationMode === "infinite" ? elementRef : undefined}
+                scrollTriggerRef={paginationMode === "infinite" ? scrollTriggerRef : undefined}
               />
             </div>
           )}
@@ -192,7 +193,7 @@ export function HomeLayout({
                     onPageChange={handlePageChange}
                     mode={paginationMode}
                     onModeChange={setPaginationMode}
-                    scrollTriggerRef={paginationMode === "infinite" ? elementRef : undefined}
+                    scrollTriggerRef={paginationMode === "infinite" ? scrollTriggerRef : undefined}
                   />
                 </div>
               )}

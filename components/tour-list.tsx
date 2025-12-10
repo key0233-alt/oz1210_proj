@@ -33,6 +33,8 @@ interface TourListProps {
   onCardHover?: (contentId: string) => void;
   /** 카드 호버 해제 핸들러 (지도 연동용, 선택 사항) */
   onCardHoverLeave?: () => void;
+  /** 재시도 핸들러 */
+  onRetry?: () => void;
 }
 
 /**
@@ -48,12 +50,14 @@ export function TourList({
   onCardClick,
   onCardHover,
   onCardHoverLeave,
+  onRetry,
 }: TourListProps) {
   const isSearchMode = !!searchKeyword;
   // 로딩 상태
   if (isLoading) {
     return (
-      <div className={cn("w-full", className)}>
+      <div className={cn("w-full", className)} aria-live="polite" aria-busy="true">
+        <div className="sr-only">관광지 목록을 불러오는 중입니다.</div>
         <SkeletonCardList count={6} />
       </div>
     );
@@ -61,12 +65,20 @@ export function TourList({
 
   // 에러 상태
   if (error) {
+    // 에러 타입 판단 (네트워크 에러인지 API 에러인지)
+    const errorType = error.toLowerCase().includes("network") || 
+                      error.toLowerCase().includes("fetch") ||
+                      error.toLowerCase().includes("네트워크")
+                      ? "network" 
+                      : "api";
+    
     return (
       <div className={cn("w-full", className)}>
         <Error
           message={error}
-          type="api"
+          type={errorType}
           className="w-full"
+          onRetry={onRetry}
         />
       </div>
     );
@@ -81,16 +93,28 @@ export function TourList({
           className
         )}
       >
-        <p className="text-lg font-medium text-muted-foreground">
-          {isSearchMode
-            ? "검색 결과가 없습니다"
-            : "관광지를 찾을 수 없습니다"}
-        </p>
-        <p className="text-sm text-muted-foreground text-center">
-          {isSearchMode
-            ? `"${searchKeyword}"에 대한 검색 결과가 없습니다. 다른 키워드로 시도해보세요.`
-            : "다른 검색 조건으로 시도해보세요."}
-        </p>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-lg font-semibold text-foreground">
+            {isSearchMode
+              ? "검색 결과가 없습니다"
+              : "관광지를 찾을 수 없습니다"}
+          </p>
+          <p className="text-sm text-muted-foreground max-w-md">
+            {isSearchMode ? (
+              <>
+                <span className="font-medium">"{searchKeyword}"</span>에 대한 검색 결과가 없습니다.
+                <br />
+                다른 키워드로 검색하거나 필터를 조정해보세요.
+              </>
+            ) : (
+              <>
+                선택한 조건에 맞는 관광지가 없습니다.
+                <br />
+                다른 지역이나 관광 타입을 선택하거나 필터를 초기화해보세요.
+              </>
+            )}
+          </p>
+        </div>
       </div>
     );
   }

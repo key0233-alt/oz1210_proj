@@ -517,12 +517,32 @@ export function NaverMap({
       {/* 에러 상태 */}
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/50 rounded-lg">
-          <div className="flex flex-col items-center gap-2 p-4 text-center">
-            <MapPin className="h-8 w-8 text-destructive" />
-            <p className="text-sm font-medium text-destructive">{error}</p>
-            <p className="text-xs text-muted-foreground">
-              환경변수 NEXT_PUBLIC_NAVER_MAP_CLIENT_ID를 확인해주세요.
-            </p>
+          <div className="flex flex-col items-center gap-3 p-6 text-center max-w-md">
+            <MapPin className="h-10 w-10 text-destructive" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-destructive">{error}</p>
+              {error.includes("환경변수") || error.includes("CLIENT_ID") ? (
+                <p className="text-xs text-muted-foreground">
+                  환경변수 <code className="px-1 py-0.5 bg-muted rounded text-xs">NEXT_PUBLIC_NAVER_MAP_CLIENT_ID</code>를 확인해주세요.
+                </p>
+              ) : error.includes("로드") || error.includes("타임아웃") ? (
+                <p className="text-xs text-muted-foreground">
+                  네이버 지도 API를 불러오는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  지도를 표시할 수 없습니다. 페이지를 새로고침하거나 잠시 후 다시 시도해주세요.
+                </p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+              className="mt-2"
+            >
+              새로고침
+            </Button>
           </div>
         </div>
       )}

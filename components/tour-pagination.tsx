@@ -164,8 +164,17 @@ export function TourPagination({
     >
       {/* 페이지 정보 */}
       <div className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">
-        전체 {totalCount.toLocaleString()}개 중 {((currentPage - 1) * pageSize + 1).toLocaleString()}-
-        {Math.min(currentPage * pageSize, totalCount).toLocaleString()}개 표시
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <Loading size="sm" />
+            <span>로딩 중...</span>
+          </div>
+        ) : (
+          <>
+            전체 {totalCount.toLocaleString()}개 중 {((currentPage - 1) * pageSize + 1).toLocaleString()}-
+            {Math.min(currentPage * pageSize, totalCount).toLocaleString()}개 표시
+          </>
+        )}
       </div>
 
       {/* 페이지네이션 컨트롤 */}

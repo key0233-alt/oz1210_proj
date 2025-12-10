@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { TourItem } from "@/lib/types/tour";
@@ -41,7 +41,7 @@ const DEFAULT_IMAGE_URL =
 /**
  * 관광지 카드 컴포넌트
  */
-export function TourCard({
+export const TourCard = memo(function TourCard({
   tour,
   className,
   isSelected = false,
@@ -145,5 +145,5 @@ export function TourCard({
     </Link>
     </div>
   );
-}
+});
 

@@ -68,7 +68,7 @@ export function TourFilters({ className }: TourFiltersProps) {
   return (
     <Card className={cn("w-full", className)}>
       <CardContent className="p-4 lg:p-6">
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6" role="group" aria-label="관광지 필터">
           {/* 첫 번째 행: 지역 필터, 정렬, 초기화 버튼 */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-6">
             {/* 지역 필터 */}
