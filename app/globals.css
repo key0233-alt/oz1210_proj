@@ -123,3 +123,16 @@
     @apply max-w-7xl mx-auto pt-16 px-4;
   }
 }
+
+/* Swiper 커스텀 스타일 */
+@layer components {
+  .swiper-pagination-bullet {
+    @apply bg-foreground/50 opacity-100;
+  }
+  .swiper-pagination-bullet-active {
+    @apply bg-primary opacity-100;
+  }
+  .swiper-button-disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+}

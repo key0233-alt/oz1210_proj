@@ -14,6 +14,7 @@ import { getDetailCommon, getDetailIntro } from "@/lib/api/tour-api";
 import { Button } from "@/components/ui/button";
 import { DetailInfo } from "@/components/tour-detail/detail-info";
 import { DetailIntro } from "@/components/tour-detail/detail-intro";
+import { DetailGallery } from "@/components/tour-detail/detail-gallery";
 import { TourDetail } from "@/lib/types/tour";
 
 interface PlacePageProps {
@@ -116,13 +117,11 @@ export default async function PlacePage({ params }: PlacePageProps) {
           {/* 기본 정보 섹션 */}
           <DetailInfo detail={detail} />
 
+          {/* 이미지 갤러리 섹션 */}
+          <DetailGallery contentId={contentId} title={detail.title} />
+
           {/* 운영 정보 섹션 */}
           <DetailIntro intro={intro} />
-
-          {/* 추가 섹션들은 다음 단계에서 구현 */}
-          <div className="text-center text-muted-foreground">
-            <p>추가 정보 섹션은 다음 단계에서 구현됩니다.</p>
-          </div>
         </div>
       </main>
     </div>
