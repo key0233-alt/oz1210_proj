@@ -11,12 +11,13 @@ import { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getDetailCommon, getDetailIntro } from "@/lib/api/tour-api";
+import { getDetailCommon, getDetailIntro, getDetailPetTour } from "@/lib/api/tour-api";
 import { Button } from "@/components/ui/button";
 import { DetailInfo } from "@/components/tour-detail/detail-info";
 import { DetailIntro } from "@/components/tour-detail/detail-intro";
 import { DetailGallery } from "@/components/tour-detail/detail-gallery";
 import { DetailMap } from "@/components/tour-detail/detail-map";
+import { DetailPetTour } from "@/components/tour-detail/detail-pet-tour";
 import { ShareButton } from "@/components/tour-detail/share-button";
 import { BookmarkButton } from "@/components/bookmarks/bookmark-button";
 import { TourDetail } from "@/lib/types/tour";
@@ -111,6 +112,12 @@ export default async function PlacePage({ params }: PlacePageProps) {
   // 운영 정보는 없어도 페이지는 표시 (에러는 무시)
   const intro = introResult.success ? introResult.data : null;
 
+  // 반려동물 정보 조회
+  const petTourResult = await getDetailPetTour(contentId, true);
+
+  // 반려동물 정보는 없어도 페이지는 표시 (에러는 무시)
+  const petTour = petTourResult.success ? petTourResult.data : null;
+
   return (
     <div className="min-h-screen bg-background">
       {/* 헤더 영역: 뒤로가기 버튼 및 공유 버튼 */}
@@ -141,6 +148,9 @@ export default async function PlacePage({ params }: PlacePageProps) {
         <div className="mx-auto max-w-4xl space-y-8">
           {/* 기본 정보 섹션 */}
           <DetailInfo detail={detail} />
+
+          {/* 반려동물 동반 정보 섹션 */}
+          <DetailPetTour petTour={petTour} />
 
           {/* 이미지 갤러리 섹션 */}
           <DetailGallery contentId={contentId} title={detail.title} />
