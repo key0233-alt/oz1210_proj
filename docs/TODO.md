@@ -401,14 +401,15 @@
     - [x] 병렬 API 호출로 성능 최적화
     - [x] 에러 처리 및 재시도 로직
     - [ ] 데이터 캐싱 (revalidate: 3600) - Server Component에서 fetch 옵션으로 처리 예정
-- [ ] 통계 요약 카드
-  - [ ] `components/stats/stats-summary.tsx` 생성
-    - [ ] 전체 관광지 수 표시
-    - [ ] Top 3 지역 표시 (카드 형태)
-    - [ ] Top 3 타입 표시 (카드 형태)
-    - [ ] 마지막 업데이트 시간 표시
-    - [ ] 로딩 상태 (Skeleton UI)
-    - [ ] 카드 레이아웃 디자인
+- [x] 통계 요약 카드
+  - [x] `components/stats/stats-summary.tsx` 생성
+    - [x] 전체 관광지 수 표시 (큰 숫자로 강조, MapPin 아이콘)
+    - [x] Top 3 지역 표시 (카드 형태, 리스트 레이아웃, 순위 뱃지)
+    - [x] Top 3 타입 표시 (카드 형태, 리스트 레이아웃, 순위 뱃지)
+    - [x] 마지막 업데이트 시간 표시 (formatDateTimeKR 사용)
+    - [x] 로딩 상태 (Skeleton UI - `stats-summary-skeleton.tsx`)
+    - [x] 카드 레이아웃 디자인 (반응형 그리드: 모바일 1열, 태블릿 2열, 데스크톱 4열)
+    - [x] `app/stats/page.tsx`에 통합 (Suspense로 로딩 처리)
 - [ ] 지역별 분포 차트 (Bar Chart)
   - [ ] `components/stats/region-chart.tsx` 생성
     - [ ] shadcn/ui Chart 컴포넌트 설치 (Bar)
