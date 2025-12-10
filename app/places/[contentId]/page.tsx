@@ -18,9 +18,14 @@ import { DetailIntro } from "@/components/tour-detail/detail-intro";
 import { DetailGallery } from "@/components/tour-detail/detail-gallery";
 import { DetailMap } from "@/components/tour-detail/detail-map";
 import { DetailPetTour } from "@/components/tour-detail/detail-pet-tour";
+import {
+  DetailRecommendations,
+  DetailRecommendationsSkeleton,
+} from "@/components/tour-detail/detail-recommendations";
 import { ShareButton } from "@/components/tour-detail/share-button";
 import { BookmarkButton } from "@/components/bookmarks/bookmark-button";
 import { TourDetail } from "@/lib/types/tour";
+import { Suspense } from "react";
 
 interface PlacePageProps {
   params: Promise<{
@@ -160,6 +165,17 @@ export default async function PlacePage({ params }: PlacePageProps) {
 
           {/* 운영 정보 섹션 */}
           <DetailIntro intro={intro} />
+
+          {/* 추천 관광지 섹션 */}
+          {detail.areacode && detail.contenttypeid && (
+            <Suspense fallback={<DetailRecommendationsSkeleton />}>
+              <DetailRecommendations
+                currentContentId={contentId}
+                areaCode={detail.areacode}
+                contentTypeId={detail.contenttypeid}
+              />
+            </Suspense>
+          )}
         </div>
       </main>
     </div>

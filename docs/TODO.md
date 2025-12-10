@@ -319,9 +319,28 @@
     - [x] 반려동물 전용 시설 정보
     - [x] 아이콘 및 뱃지 디자인 (🐾)
     - [x] 주의사항 강조 표시
-- [ ] 추천 관광지 섹션 (선택 사항)
-  - [ ] 같은 지역 또는 타입의 다른 관광지 추천
-  - [ ] 카드 형태로 표시
+- [x] 추천 관광지 섹션 (선택 사항)
+  - [x] `components/tour-detail/detail-recommendations.tsx` 컴포넌트 생성
+    - [x] Server Component로 구현
+    - [x] `getAreaBasedList` API를 사용하여 같은 지역 + 같은 타입의 관광지 조회
+    - [x] 현재 관광지(`currentContentId`) 제외 로직
+    - [x] 최대 6개 추천 (설정 가능)
+    - [x] 로딩 상태 처리 (`DetailRecommendationsSkeleton` 컴포넌트)
+    - [x] 빈 상태 처리 (추천 관광지가 없을 때 섹션 숨김)
+    - [x] 에러 처리 (에러 발생 시 섹션 숨김, 선택 사항이므로)
+  - [x] UI 구현
+    - [x] 섹션 제목 ("추천 관광지")
+    - [x] 기존 `TourCard` 컴포넌트 재사용
+    - [x] 반응형 그리드 레이아웃 (모바일: 1열, 태블릿: 2열, 데스크톱: 3열)
+    - [x] 스켈레톤 UI (`SkeletonCardList` 재사용)
+  - [x] 상세페이지 통합
+    - [x] `app/places/[contentId]/page.tsx`에 컴포넌트 추가
+    - [x] 운영 정보 섹션(`DetailIntro`) 다음에 배치
+    - [x] Suspense로 로딩 상태 처리
+    - [x] 필요한 props 전달 (`currentContentId`, `areaCode`, `contentTypeId`)
+  - [x] 접근성 개선
+    - [x] ARIA 라벨 추가 ("추천 관광지 섹션")
+    - [x] 키보드 네비게이션 지원 (기존 `TourCard`에 이미 구현됨)
 - [ ] 최종 통합 및 스타일링
   - [ ] 모든 섹션 통합
   - [ ] 반응형 디자인 확인
