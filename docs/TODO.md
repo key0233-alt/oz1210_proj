@@ -582,20 +582,145 @@
 
 ## 추가 작업 (선택 사항)
 
-- [ ] 다크 모드 지원
-  - [ ] 테마 전환 기능
-  - [ ] 모든 컴포넌트 다크 모드 스타일 적용
-- [ ] PWA 지원
-  - [ ] `app/manifest.ts` 생성
-  - [ ] Service Worker 설정
-  - [ ] 오프라인 지원
-- [ ] 접근성 개선
-  - [ ] ARIA 라벨 추가
-  - [ ] 키보드 네비게이션 개선
+- [x] 다크 모드 지원
+  - [x] 테마 Provider 설정
+    - [x] `components/providers/theme-provider.tsx` 생성
+      - [x] `next-themes`의 `ThemeProvider` 사용
+      - [x] 시스템 테마 감지 (`system` 옵션)
+      - [x] 테마 저장 (localStorage)
+      - [x] SSR 플리커 방지 (`attribute="class"`, `disableTransitionOnChange`)
+  - [x] 테마 전환 버튼 컴포넌트
+    - [x] `components/theme-toggle.tsx` 생성
+      - [x] 라이트/다크/시스템 모드 전환
+      - [x] Moon/Sun 아이콘 (lucide-react)
+      - [x] 현재 테마 상태 표시
+      - [x] 접근성 (ARIA 라벨, 키보드 네비게이션)
+  - [x] Navbar에 테마 토글 버튼 추가
+    - [x] 데스크톱: 로그인 버튼 옆에 배치
+    - [x] 모바일: 햄버거 메뉴에 추가
+  - [x] `app/layout.tsx`에 ThemeProvider 통합
+    - [x] `<html>` 태그에 `suppressHydrationWarning` 추가
+    - [x] ThemeProvider로 루트 레이아웃 감싸기
+  - [ ] 다크 모드 스타일 검증
+    - [ ] 모든 컴포넌트 다크 모드 스타일 확인 (이미 `globals.css`에 `.dark` 클래스 정의됨)
+    - [ ] 네이버 지도 다크 모드 스타일 (지도 타입 변경 또는 커스텀 스타일)
+    - [ ] 이미지 대비 확인 (다크 모드에서도 가독성 유지)
+    - [ ] 차트 다크 모드 색상 확인 (이미 chart-1~5 색상 정의됨)
+- [x] PWA 지원
+  - [x] `app/manifest.ts` 생성
+    - [x] 기본 메타데이터 (name, short_name, description)
+    - [x] 아이콘 경로 설정 (`/icons/icon-192x192.png`, `/icons/icon-512x512.png`)
+    - [x] 테마 색상 설정 (`theme_color`, `background_color`)
+    - [x] 디스플레이 모드 (`standalone`, `fullscreen`)
+    - [x] 시작 URL 설정 (`start_url: "/"`)
+    - [x] 방향 설정 (`orientation: "portrait"`)
+  - [x] PWA 아이콘 생성
+    - [x] `public/icons/` 디렉토리 생성
+    - [x] 다양한 크기 아이콘 생성 (192x192, 512x512)
+    - [x] favicon.ico 생성 (`app/favicon.ico` 또는 `public/favicon.ico`)
+    - [ ] Apple Touch Icon 생성 (`public/apple-touch-icon.png`) (선택 사항)
+  - [x] Service Worker 설정
+    - [x] `public/sw.js` 또는 `app/sw.js` 생성
+      - [x] 기본 캐싱 전략 (Cache First, Network First)
+      - [x] 정적 자산 캐싱 (CSS, JS, 이미지)
+      - [x] API 응답 캐싱 (선택적, 한국관광공사 API는 실시간성 중요)
+      - [x] 오프라인 페이지 (`offline.html`)
+    - [x] Service Worker 등록
+      - [x] `app/layout.tsx` 또는 별도 컴포넌트에서 등록
+      - [x] 브라우저 호환성 확인 (Service Worker 지원 여부)
+      - [x] 업데이트 알림 (새 버전 감지 시)
+  - [x] 오프라인 지원
+    - [x] 오프라인 페이지 생성 (`public/offline.html`)
+      - [x] 사용자 친화적인 오프라인 메시지
+      - [x] 재시도 버튼
+    - [ ] 오프라인 상태 감지
+      - [ ] `navigator.onLine` API 사용
+      - [ ] 오프라인 상태 UI 표시 (선택 사항)
+  - [ ] `next.config.ts` PWA 설정 확인
+    - [ ] `next-pwa` 플러그인 사용 여부 확인 (선택 사항)
+    - [ ] 또는 수동 Service Worker 관리
+- [x] 접근성 개선
+  - [x] ARIA 라벨 추가
+    - [x] 모든 인터랙티브 요소에 `aria-label` 또는 `aria-labelledby` 추가
+    - [x] 폼 요소에 `aria-describedby` 추가 (에러 메시지 연결)
+    - [x] 네비게이션에 `aria-current` 추가 (현재 페이지 표시)
+    - [x] 로딩 상태에 `aria-live="polite"` 추가
+    - [x] 모달/다이얼로그에 `role="dialog"`, `aria-modal="true"` 추가 (Radix UI가 자동 처리)
+  - [x] 키보드 네비게이션 개선
+    - [x] 모든 인터랙티브 요소에 `tabIndex` 확인
+    - [x] 포커스 순서 확인 (논리적 순서)
+    - [x] 포커스 스타일 개선 (`focus-visible` 스타일 확인)
+    - [x] 스킵 링크 추가 (`<a href="#main-content">본문으로 건너뛰기</a>`)
+    - [ ] 키보드 단축키 지원 (선택 사항: 검색창 포커스 `/`, ESC로 모달 닫기)
   - [ ] 색상 대비 확인 (WCAG AA)
-- [ ] 성능 모니터링
-  - [ ] Web Vitals 측정
-  - [ ] 에러 로깅 (Sentry 등)
-- [ ] 사용자 피드백
-  - [ ] 피드백 수집 기능
-  - [ ] 버그 리포트 기능
+    - [ ] 텍스트-배경 대비 비율 확인 (최소 4.5:1, 큰 텍스트는 3:1)
+    - [ ] 버튼/링크 색상 대비 확인
+    - [ ] 차트 색상 대비 확인 (다크 모드 포함)
+    - [ ] 이미지 대체 텍스트 (`alt` 속성) 확인
+    - [ ] 도구 사용: Lighthouse 접근성 감사, WAVE, axe DevTools
+  - [ ] 스크린 리더 지원
+    - [ ] 시맨틱 HTML 사용 확인 (`<nav>`, `<main>`, `<article>`, `<section>` 등)
+    - [ ] 숨김 텍스트 추가 (시각적으로만 표시되는 정보)
+    - [ ] 테이블 접근성 (헤더 연결, `scope` 속성)
+- [x] 성능 모니터링
+  - [x] Web Vitals 측정
+    - [x] `app/layout.tsx` 또는 별도 컴포넌트에 Web Vitals 측정 코드 추가
+      - [x] `next/web-vitals` 패키지 사용
+      - [x] CLS (Cumulative Layout Shift) 측정
+      - [x] FID (First Input Delay) / INP (Interaction to Next Paint) 측정
+      - [x] LCP (Largest Contentful Paint) 측정
+      - [x] FCP (First Contentful Paint) 측정
+      - [x] TTFB (Time to First Byte) 측정
+    - [ ] Vercel Analytics 통합 (선택 사항)
+      - [ ] `@vercel/analytics` 패키지 설치
+      - [ ] `app/layout.tsx`에 `<Analytics />` 추가
+    - [ ] 커스텀 분석 (선택 사항)
+      - [ ] Google Analytics 4 통합
+      - [ ] 또는 Supabase에 Web Vitals 데이터 저장
+  - [x] 에러 로깅 (Sentry 등)
+    - [ ] Sentry 설정 (선택 사항)
+      - [ ] `@sentry/nextjs` 패키지 설치
+      - [ ] `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts` 생성
+      - [ ] `next.config.ts`에 Sentry 플러그인 통합
+      - [ ] 환경변수 설정 (`SENTRY_DSN`)
+      - [ ] 에러 바운더리와 통합
+    - [x] 또는 간단한 에러 로깅
+      - [x] `lib/utils/logger.ts` 생성
+      - [x] 개발 환경: `console.error`
+      - [x] 프로덕션: API 엔드포인트로 에러 전송 (`/api/log-error`)
+      - [ ] Supabase에 에러 로그 저장 (선택 사항)
+- [x] 사용자 피드백
+  - [x] 피드백 수집 기능
+    - [x] 피드백 버튼 컴포넌트
+      - [x] `components/feedback-button.tsx` 생성
+        - [x] 고정 위치 플로팅 버튼 (우측 하단)
+        - [x] 피드백 아이콘 (MessageSquare, lucide-react)
+        - [x] 클릭 시 피드백 모달 열기
+    - [x] 피드백 모달/폼
+      - [x] `components/feedback-form.tsx` 생성
+        - [x] 피드백 유형 선택 (버그 리포트, 기능 제안, 기타)
+        - [x] 피드백 내용 입력 (textarea)
+        - [x] 이메일 입력 (선택 사항)
+        - [ ] 스크린샷 첨부 (선택 사항, 향후 구현)
+        - [x] react-hook-form + Zod로 유효성 검사
+    - [x] 피드백 저장
+      - [x] Supabase `feedback` 테이블 생성 (마이그레이션)
+        - [x] `id` (UUID, PK)
+        - [x] `user_id` (UUID, FK, nullable - 비로그인 사용자도 가능)
+        - [x] `type` (TEXT: 'bug', 'suggestion', 'other')
+        - [x] `content` (TEXT)
+        - [x] `email` (TEXT, nullable)
+        - [x] `screenshot_url` (TEXT, nullable)
+        - [x] `created_at` (TIMESTAMP)
+      - [x] `lib/api/feedback-api.ts` 생성
+        - [x] `submitFeedback()` 함수
+      - [x] API 라우트 또는 Server Action으로 구현
+    - [x] 피드백 완료 토스트 메시지
+  - [x] 버그 리포트 기능
+    - [ ] 자동 버그 리포트 수집 (선택 사항)
+      - [ ] 전역 에러 핸들러에서 자동 수집
+      - [ ] 에러 스택 트레이스 포함
+      - [ ] 사용자 동의 후 전송
+    - [x] 수동 버그 리포트
+      - [x] 피드백 폼의 "버그 리포트" 유형 활용
+      - [x] 자동 정보 수집 (브라우저, OS, URL, 타임스탬프)

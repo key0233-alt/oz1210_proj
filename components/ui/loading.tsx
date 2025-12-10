@@ -46,6 +46,9 @@ export function Loading({
         "flex flex-col items-center justify-center gap-2",
         className
       )}
+      role="status"
+      aria-live="polite"
+      aria-label={text || "로딩 중"}
     >
       <Loader2
         className={cn(
@@ -53,6 +56,7 @@ export function Loading({
           sizeMap[size],
           !text && className
         )}
+        aria-hidden="true"
       />
       {text && (
         <p className={cn("text-muted-foreground", textSizeMap[size])}>
