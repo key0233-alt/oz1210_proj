@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { DetailInfo } from "@/components/tour-detail/detail-info";
 import { DetailIntro } from "@/components/tour-detail/detail-intro";
 import { DetailGallery } from "@/components/tour-detail/detail-gallery";
+import { DetailMap } from "@/components/tour-detail/detail-map";
 import { TourDetail } from "@/lib/types/tour";
 
 interface PlacePageProps {
@@ -119,6 +120,9 @@ export default async function PlacePage({ params }: PlacePageProps) {
 
           {/* 이미지 갤러리 섹션 */}
           <DetailGallery contentId={contentId} title={detail.title} />
+
+          {/* 지도 섹션 */}
+          <DetailMap detail={detail} />
 
           {/* 운영 정보 섹션 */}
           <DetailIntro intro={intro} />

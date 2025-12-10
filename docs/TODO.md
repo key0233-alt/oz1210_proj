@@ -247,14 +247,36 @@
     - [x] 이미지 클릭 시 전체화면 모달
     - [x] 이미지 없으면 기본 이미지
     - [x] Next.js Image 컴포넌트 사용 (최적화)
-- [ ] 지도 섹션 (MVP 2.4.4)
-  - [ ] `components/tour-detail/detail-map.tsx` 생성
-    - [ ] 해당 관광지 위치 표시
-    - [ ] 마커 1개 표시
-    - [ ] "길찾기" 버튼
-      - [ ] 네이버 지도 앱/웹 연동
-      - [ ] URL: `https://map.naver.com/v5/directions/{좌표}`
-    - [ ] 좌표 정보 표시 (선택 사항)
+- [x] 지도 섹션 (MVP 2.4.4)
+  - [x] `components/tour-detail/detail-map.tsx` 생성
+    - [x] 네이버 지도 API 스크립트 동적 로드 (기존 `naver-map.tsx`의 `loadNaverMapsScript` 함수 재사용)
+    - [x] 관광지 좌표 변환 (KATEC → WGS84: `katecToWgs84` 유틸리티 사용)
+    - [x] 지도 초기화 및 해당 관광지 위치로 중심 설정
+      - [x] 줌 레벨: 15 (상세 위치 표시에 적합)
+      - [x] 지도 타입: 일반 지도 (기본)
+    - [x] 마커 1개 표시
+      - [x] 관광지명을 마커에 표시
+      - [x] 마커 클릭 시 인포윈도우 (관광지명, 주소)
+    - [x] "길찾기" 버튼
+      - [x] 네이버 지도 앱/웹 연동
+      - [x] URL 형식: `https://map.naver.com/v5/directions/{lng},{lat}` 또는 `https://map.naver.com/v5/search/{주소}`
+      - [x] 모바일: 네이버 지도 앱 열기 (`nmap://route/car?dlat={lat}&dlng={lng}&dname={title}`)
+      - [x] 데스크톱: 네이버 지도 웹 열기 (새 탭)
+      - [x] 버튼 아이콘: Navigation 또는 MapPin (lucide-react)
+    - [x] 좌표 정보 표시 (선택 사항)
+      - [x] 토글 버튼으로 표시/숨김
+      - [x] 위도/경도 표시 (소수점 6자리)
+      - [x] 복사 버튼 (클립보드 복사)
+    - [x] 로딩 상태 처리
+      - [x] 지도 로딩 중 스피너 표시
+      - [x] 에러 상태 처리 (네이버 지도 API 로드 실패 시)
+    - [x] 반응형 디자인
+      - [x] 모바일: 높이 300px
+      - [x] 데스크톱: 높이 400px
+      - [x] 지도 컨테이너 rounded-lg 스타일
+    - [x] 접근성 개선
+      - [x] ARIA 라벨 추가
+      - [x] 키보드 네비게이션 지원
 - [ ] 공유 기능 (MVP 2.4.5)
   - [ ] `components/tour-detail/share-button.tsx` 생성
     - [ ] URL 복사 기능
