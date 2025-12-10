@@ -39,6 +39,8 @@ yarn-error.log*
 .env.test*
 .env.production*
 .env.local*
+# .env.example은 버전 관리에 포함
+!.env.example
 
 # vercel
 .vercel

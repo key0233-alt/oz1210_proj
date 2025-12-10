@@ -30,10 +30,18 @@ const OPTIONAL_ENV_VARS = {
   NEXT_PUBLIC_NAVER_MAP_CLIENT_ID: "네이버 지도 클라이언트 ID",
   // Clerk (인증 기능 사용 시 필요)
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "Clerk Publishable Key",
-  CLERK_SECRET_KEY: "Clerk Secret Key",
+  CLERK_SECRET_KEY: "Clerk Secret Key (서버 전용)",
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL: "Clerk 로그인 URL",
+  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: "Clerk 로그인 후 리다이렉트 URL",
+  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: "Clerk 회원가입 후 리다이렉트 URL",
   // Supabase (북마크/데이터베이스 기능 사용 시 필요)
-  NEXT_PUBLIC_SUPABASE_URL: "Supabase URL",
+  NEXT_PUBLIC_SUPABASE_URL: "Supabase 프로젝트 URL",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "Supabase Anon Key",
+  SUPABASE_SERVICE_ROLE_KEY: "Supabase Service Role Key (서버 전용)",
+  NEXT_PUBLIC_STORAGE_BUCKET: "Supabase Storage 버킷 이름",
+  // 기타
+  NEXT_PUBLIC_SITE_URL: "사이트 URL (SEO, sitemap 등에 사용)",
+  ANALYZE: "번들 분석 플래그 (true로 설정 시 번들 분석 활성화)",
 } as const;
 
 /**
@@ -226,13 +234,15 @@ export function getEnv(
  * 서버 사이드 전용 환경변수 접근
  * 클라이언트에서 접근하면 에러 발생
  */
-export function getServerEnv(key: "TOUR_API_KEY" | "CLERK_SECRET_KEY"): string {
+export function getServerEnv(
+  key: "TOUR_API_KEY" | "CLERK_SECRET_KEY" | "SUPABASE_SERVICE_ROLE_KEY"
+): string {
   if (typeof window !== "undefined") {
     throw new Error(
       `환경변수 ${key}는 서버 사이드에서만 접근 가능합니다.`
     );
   }
-  return getEnv(key as keyof typeof REQUIRED_SERVER_ENV_VARS | keyof typeof REQUIRED_ENV_VARS);
+  return getEnv(key as keyof typeof REQUIRED_SERVER_ENV_VARS | keyof typeof REQUIRED_ENV_VARS | keyof typeof OPTIONAL_ENV_VARS);
 }
 
 // 개발 환경에서 자동 검증 실행
