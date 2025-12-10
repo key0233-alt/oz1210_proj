@@ -449,11 +449,25 @@
 
 ## Phase 5: 북마크 페이지 (`/bookmarks`) - 선택 사항
 
-- [ ] Supabase 설정 확인
-  - [ ] `bookmarks` 테이블 확인 (db.sql 참고)
-    - [ ] `users` 테이블과의 관계 확인
-    - [ ] 인덱스 확인 (user_id, content_id, created_at)
-    - [ ] RLS 비활성화 확인 (개발 환경)
+- [x] Supabase 설정 확인
+  - [x] `bookmarks` 테이블 확인 (db.sql 참고)
+    - [x] 테이블 구조 확인: `id` (UUID, PK), `user_id` (UUID, FK), `content_id` (TEXT), `created_at` (TIMESTAMP)
+    - [x] UNIQUE 제약 확인: `unique_user_bookmark (user_id, content_id)`
+    - [x] `users` 테이블과의 관계 확인
+      - [x] 외래키: `REFERENCES public.users(id) ON DELETE CASCADE`
+      - [x] users 테이블이 먼저 생성됨 (의존성 확인)
+    - [x] 인덱스 확인 (user_id, content_id, created_at)
+      - [x] `idx_bookmarks_user_id` - user_id 인덱스
+      - [x] `idx_bookmarks_content_id` - content_id 인덱스
+      - [x] `idx_bookmarks_created_at` - created_at DESC 인덱스 (최신순 정렬 최적화)
+    - [x] RLS 비활성화 확인 (개발 환경)
+      - [x] `ALTER TABLE public.bookmarks DISABLE ROW LEVEL SECURITY;` 확인
+    - [x] API 함수 호환성 확인 (`lib/api/supabase-api.ts`)
+      - [x] `getBookmark()` - 단일 북마크 조회 (스키마 호환)
+      - [x] `addBookmark()` - 북마크 추가 (UNIQUE 제약 처리: error.code === "23505")
+      - [x] `removeBookmark()` - 북마크 제거 (스키마 호환)
+      - [x] `getUserBookmarks()` - 사용자 북마크 목록 조회 (created_at DESC 정렬)
+      - [x] `getUserIdByClerkId()` - Clerk ID → Supabase user ID 변환
 - [ ] 북마크 목록 페이지
   - [ ] `app/bookmarks/page.tsx` 생성
     - [ ] 인증된 사용자만 접근 가능
