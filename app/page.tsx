@@ -7,8 +7,9 @@
  */
 
 import { Suspense } from "react";
-import { getAreaBasedList } from "@/lib/api/tour-api";
+import { getAreaBasedList, searchKeyword } from "@/lib/api/tour-api";
 import { TourList } from "@/components/tour-list";
+import { HomeLayout } from "@/components/home-layout";
 import { TourFilters } from "@/components/tour-filters";
 import { PAGINATION_DEFAULTS } from "@/lib/constants/api";
 import { TourItem } from "@/lib/types/tour";
@@ -29,6 +30,7 @@ interface HomeProps {
  * 관광지 목록 데이터 페칭 컴포넌트
  */
 async function TourListData({
+  keyword,
   areaCode,
   contentTypeId,
   pet,
@@ -36,6 +38,7 @@ async function TourListData({
   sort,
   pageNo,
 }: {
+  keyword?: string;
   areaCode?: string;
   contentTypeId?: string;
   pet?: string;
@@ -59,8 +62,39 @@ async function TourListData({
   let hasError = false;
   let errorMessage: string | null = null;
 
-  // 다중 타입 선택 처리
-  if (contentTypeIds.length > 0) {
+  // 검색 모드: keyword가 있으면 searchKeyword API 사용
+  if (keyword && keyword.trim()) {
+    const trimmedKeyword = keyword.trim();
+    
+    // 검색 API는 단일 contentTypeId만 지원하므로 첫 번째 타입만 사용
+    const singleContentTypeId = contentTypeIds.length > 0 ? contentTypeIds[0] : undefined;
+    
+    const result = await searchKeyword(
+      trimmedKeyword,
+      finalAreaCode,
+      singleContentTypeId,
+      PAGINATION_DEFAULTS.numOfRows,
+      finalPageNo,
+      true // 서버 사이드 호출
+    );
+
+    if (!result.success) {
+      return (
+        <HomeLayout
+          tours={[]}
+          isLoading={false}
+          error={result.error || "검색 중 오류가 발생했습니다."}
+          searchKeyword={trimmedKeyword}
+          areaCode={finalAreaCode}
+        />
+      );
+    }
+
+    allTours = result.data || [];
+  } else {
+    // 일반 모드: 기존 getAreaBasedList 로직
+    // 다중 타입 선택 처리
+    if (contentTypeIds.length > 0) {
     // 각 타입별로 API 호출 후 결과 병합
     const promises = contentTypeIds.map((typeId) =>
       getAreaBasedList(
@@ -101,18 +135,20 @@ async function TourListData({
 
     if (!result.success) {
       return (
-        <TourList
+        <HomeLayout
           tours={[]}
           isLoading={false}
           error={result.error || "관광지 목록을 불러오는 중 오류가 발생했습니다."}
+          areaCode={finalAreaCode}
         />
       );
     }
 
     allTours = result.data || [];
+    }
   }
 
-  // 정렬 처리 (클라이언트 사이드)
+  // 정렬 처리 (클라이언트 사이드) - 검색 모드와 일반 모드 모두 적용
   if (finalSort === "title") {
     // 이름순 정렬 (가나다순)
     allTours.sort((a, b) => a.title.localeCompare(b.title, "ko"));
@@ -128,20 +164,23 @@ async function TourListData({
   // 에러 처리
   if (hasError && allTours.length === 0) {
     return (
-      <TourList
+      <HomeLayout
         tours={[]}
         isLoading={false}
         error={errorMessage || "관광지 목록을 불러오는 중 오류가 발생했습니다."}
+        areaCode={finalAreaCode}
       />
     );
   }
 
-  // 데이터 표시
+  // 데이터 표시 (지도 통합을 위해 HomeLayout 사용)
   return (
-    <TourList
+    <HomeLayout
       tours={allTours}
       isLoading={false}
       error={hasError ? errorMessage : null}
+      searchKeyword={keyword?.trim() || undefined}
+      areaCode={finalAreaCode}
     />
   );
 }
@@ -151,16 +190,18 @@ async function TourListData({
  */
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
-  const { areaCode, contentTypeId, pet, petSize, sort, pageNo } = params;
+  const { keyword, areaCode, contentTypeId, pet, petSize, sort, pageNo } = params;
 
   return (
     <main className="container mx-auto px-4 py-8 lg:py-12">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-          관광지 목록
+          {keyword ? "검색 결과" : "관광지 목록"}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          전국의 다양한 관광지를 탐색해보세요.
+          {keyword
+            ? `검색어: "${keyword}"`
+            : "전국의 다양한 관광지를 탐색해보세요."}
         </p>
       </div>
 
@@ -171,10 +212,11 @@ export default async function Home({ searchParams }: HomeProps) {
 
       <Suspense
         fallback={
-          <TourList tours={[]} isLoading={true} error={null} />
+          <HomeLayout tours={[]} isLoading={true} error={null} areaCode={areaCode} />
         }
       >
         <TourListData
+          keyword={keyword}
           areaCode={areaCode}
           contentTypeId={contentTypeId}
           pet={pet}

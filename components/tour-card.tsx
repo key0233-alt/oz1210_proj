@@ -21,6 +21,14 @@ interface TourCardProps {
   tour: TourItem;
   /** 추가 클래스명 */
   className?: string;
+  /** 선택된 상태 */
+  isSelected?: boolean;
+  /** 클릭 핸들러 (지도 연동용) */
+  onClick?: (contentId: string) => void;
+  /** 호버 핸들러 (지도 연동용, 선택 사항) */
+  onMouseEnter?: (contentId: string) => void;
+  /** 마우스 나감 핸들러 (지도 연동용, 선택 사항) */
+  onMouseLeave?: () => void;
 }
 
 /**
@@ -33,7 +41,14 @@ const DEFAULT_IMAGE_URL =
 /**
  * 관광지 카드 컴포넌트
  */
-export function TourCard({ tour, className }: TourCardProps) {
+export function TourCard({
+  tour,
+  className,
+  isSelected = false,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+}: TourCardProps) {
   const {
     contentid,
     title,
@@ -56,16 +71,43 @@ export function TourCard({ tour, className }: TourCardProps) {
   // 주소 조합
   const address = addr2 ? `${addr1} ${addr2}` : addr1;
 
+  const handleClick = (e: React.MouseEvent) => {
+    // 지도 연동을 위한 클릭 핸들러가 있으면 먼저 실행
+    // 상세페이지 이동은 인포윈도우의 버튼을 통해 수행
+    if (onClick) {
+      e.preventDefault();
+      onClick(contentid);
+    }
+    // onClick이 없으면 기본 동작 (상세페이지로 이동)
+  };
+
+  const handleMouseEnter = () => {
+    if (onMouseEnter) {
+      onMouseEnter(contentid);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (onMouseLeave) {
+      onMouseLeave();
+    }
+  };
+
   return (
-    <Link
-      href={`/places/${contentid}`}
-      className={cn(
-        "group relative flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200",
-        "hover:scale-[1.02] hover:shadow-lg",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        className
-      )}
-    >
+    <div id={`tour-card-${contentid}`}>
+      <Link
+        href={`/places/${contentid}`}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={cn(
+          "group relative flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-200",
+          "hover:scale-[1.02] hover:shadow-lg",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          isSelected && "ring-2 ring-primary ring-offset-2",
+          className
+        )}
+      >
       {/* 썸네일 이미지 */}
       <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-muted">
         <Image
@@ -101,6 +143,7 @@ export function TourCard({ tour, className }: TourCardProps) {
         </div>
       </div>
     </Link>
+    </div>
   );
 }
 

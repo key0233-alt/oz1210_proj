@@ -23,6 +23,16 @@ interface TourListProps {
   error?: string | null;
   /** 추가 클래스명 */
   className?: string;
+  /** 검색 키워드 (검색 모드일 때) */
+  searchKeyword?: string;
+  /** 선택된 관광지 ID (지도 연동용) */
+  selectedContentId?: string;
+  /** 카드 클릭 핸들러 (지도 연동용) */
+  onCardClick?: (contentId: string) => void;
+  /** 카드 호버 핸들러 (지도 연동용, 선택 사항) */
+  onCardHover?: (contentId: string) => void;
+  /** 카드 호버 해제 핸들러 (지도 연동용, 선택 사항) */
+  onCardHoverLeave?: () => void;
 }
 
 /**
@@ -33,7 +43,13 @@ export function TourList({
   isLoading = false,
   error = null,
   className,
+  searchKeyword,
+  selectedContentId,
+  onCardClick,
+  onCardHover,
+  onCardHoverLeave,
 }: TourListProps) {
+  const isSearchMode = !!searchKeyword;
   // 로딩 상태
   if (isLoading) {
     return (
@@ -66,10 +82,14 @@ export function TourList({
         )}
       >
         <p className="text-lg font-medium text-muted-foreground">
-          관광지를 찾을 수 없습니다
+          {isSearchMode
+            ? "검색 결과가 없습니다"
+            : "관광지를 찾을 수 없습니다"}
         </p>
         <p className="text-sm text-muted-foreground text-center">
-          다른 검색 조건으로 시도해보세요.
+          {isSearchMode
+            ? `"${searchKeyword}"에 대한 검색 결과가 없습니다. 다른 키워드로 시도해보세요.`
+            : "다른 검색 조건으로 시도해보세요."}
         </p>
       </div>
     );
@@ -77,15 +97,30 @@ export function TourList({
 
   // 목록 표시
   return (
-    <div
-      className={cn(
-        "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6",
-        className
+    <div className={cn("w-full", className)}>
+      {/* 검색 결과 개수 표시 */}
+      {isSearchMode && (
+        <div className="mb-4 text-sm text-muted-foreground">
+          검색 결과: <span className="font-medium text-foreground">{tours.length}개</span>
+        </div>
       )}
-    >
-      {tours.map((tour) => (
-        <TourCard key={tour.contentid} tour={tour} />
-      ))}
+      
+      <div
+        className={cn(
+          "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
+        )}
+      >
+        {tours.map((tour) => (
+          <TourCard
+            key={tour.contentid}
+            tour={tour}
+            isSelected={selectedContentId === tour.contentid}
+            onClick={onCardClick}
+            onMouseEnter={onCardHover}
+            onMouseLeave={onCardHoverLeave}
+          />
+        ))}
+      </div>
     </div>
   );
 }
