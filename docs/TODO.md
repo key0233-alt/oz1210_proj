@@ -205,12 +205,16 @@
 
 ## Phase 3: 상세페이지 (`/places/[contentId]`)
 
-- [ ] 페이지 기본 구조
-  - [ ] `app/places/[contentId]/page.tsx` 생성
-    - [ ] 동적 라우팅 설정
-    - [ ] 뒤로가기 버튼 (헤더)
-    - [ ] 기본 레이아웃 구조
-    - [ ] 라우팅 테스트
+- [x] 페이지 기본 구조
+  - [x] `app/places/[contentId]/page.tsx` 생성
+    - [x] 동적 라우팅 설정
+    - [x] 뒤로가기 버튼 (헤더)
+    - [x] 기본 레이아웃 구조
+    - [x] 라우팅 테스트
+  - [x] `app/places/[contentId]/loading.tsx` 생성 (로딩 상태)
+  - [x] `app/places/[contentId]/error.tsx` 생성 (에러 처리)
+  - [x] `app/places/[contentId]/not-found.tsx` 생성 (404 처리)
+  - [x] 동적 메타데이터 설정 (`generateMetadata`)
 - [ ] 기본 정보 섹션 (MVP 2.4.1)
   - [ ] `components/tour-detail/detail-info.tsx` 생성
     - [ ] `getDetailCommon()` API 연동
