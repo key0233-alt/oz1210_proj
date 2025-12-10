@@ -22,11 +22,13 @@
 
 import { Metadata } from "next";
 import { Suspense } from "react";
-import { getStatsSummary, getRegionStats } from "@/lib/api/stats-api";
+import { getStatsSummary, getRegionStats, getTypeStats } from "@/lib/api/stats-api";
 import { StatsSummary } from "@/components/stats/stats-summary";
 import { StatsSummarySkeleton } from "@/components/stats/stats-summary-skeleton";
 import { RegionChart } from "@/components/stats/region-chart";
 import { RegionChartSkeleton } from "@/components/stats/region-chart-skeleton";
+import { TypeChart } from "@/components/stats/type-chart";
+import { TypeChartSkeleton } from "@/components/stats/type-chart-skeleton";
 
 export const metadata: Metadata = {
   title: "통계 대시보드 - My Trip",
@@ -82,6 +84,24 @@ async function RegionChartData() {
 }
 
 /**
+ * 타입별 통계 데이터 페칭 컴포넌트
+ */
+async function TypeChartData() {
+  const result = await getTypeStats();
+
+  if (!result.success || !result.data) {
+    return (
+      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+        <p className="font-semibold text-destructive">오류 발생</p>
+        <p className="text-sm text-destructive/80">{result.error}</p>
+      </div>
+    );
+  }
+
+  return <TypeChart data={result.data} />;
+}
+
+/**
  * 통계 대시보드 페이지 컴포넌트
  */
 export default async function StatsPage() {
@@ -117,12 +137,14 @@ export default async function StatsPage() {
         </Suspense>
       </section>
 
-      {/* 타입별 분포 차트 영역 (향후 컴포넌트 추가 예정) */}
+      {/* 타입별 분포 차트 영역 */}
       <section
         className="mb-8"
         aria-label="관광 타입별 분포"
       >
-        {/* TypeChart 컴포넌트가 여기에 추가될 예정 */}
+        <Suspense fallback={<TypeChartSkeleton />}>
+          <TypeChartData />
+        </Suspense>
       </section>
     </main>
   );

@@ -424,18 +424,20 @@
     - [x] 로딩 상태 (region-chart-skeleton.tsx)
     - [x] 접근성 (ARIA 라벨, 키보드 네비게이션)
     - [x] `app/stats/page.tsx`에 통합 (Suspense로 로딩 처리)
-- [ ] 타입별 분포 차트 (Donut Chart)
-  - [ ] `components/stats/type-chart.tsx` 생성
-    - [ ] shadcn/ui Chart 컴포넌트 설치 (Pie/Donut)
-    - [ ] recharts 기반 Donut Chart 구현
-    - [ ] 타입별 비율 (백분율)
-    - [ ] 타입별 개수 표시
-    - [ ] 섹션 클릭 시 해당 타입 목록 페이지로 이동
-    - [ ] 호버 시 타입명, 개수, 비율 표시
-    - [ ] 다크/라이트 모드 지원
-    - [ ] 반응형 디자인
-    - [ ] 로딩 상태
-    - [ ] 접근성 (ARIA 라벨)
+- [x] 타입별 분포 차트 (Donut Chart)
+  - [x] `components/stats/type-chart.tsx` 생성
+    - [x] shadcn/ui Chart 컴포넌트 사용 (이미 설치됨)
+    - [x] recharts 기반 Donut Chart 구현 (PieChart with innerRadius)
+    - [x] 타입별 비율 (백분율) 계산 및 표시
+    - [x] 타입별 개수 표시
+    - [x] 섹션 클릭 시 해당 타입 목록 페이지로 이동 (/?contentTypeId={contentTypeId})
+    - [x] 호버 시 타입명, 개수, 비율 표시 (ChartTooltip 사용)
+    - [x] 다크/라이트 모드 지원 (chart-1~5 색상 사용)
+    - [x] 반응형 디자인 (모바일 300px, 데스크톱 400px 높이)
+    - [x] 로딩 상태 (type-chart-skeleton.tsx)
+    - [x] 접근성 (ARIA 라벨, 키보드 네비게이션)
+    - [x] 범례 구현 (ChartLegend 사용)
+    - [x] `app/stats/page.tsx`에 통합 (Suspense로 로딩 처리)
 - [ ] 페이지 통합
   - [ ] `app/stats/page.tsx`에 모든 컴포넌트 통합
     - [ ] 통계 요약 카드 (상단)
