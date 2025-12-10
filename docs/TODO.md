@@ -215,19 +215,19 @@
   - [x] `app/places/[contentId]/error.tsx` 생성 (에러 처리)
   - [x] `app/places/[contentId]/not-found.tsx` 생성 (404 처리)
   - [x] 동적 메타데이터 설정 (`generateMetadata`)
-- [ ] 기본 정보 섹션 (MVP 2.4.1)
-  - [ ] `components/tour-detail/detail-info.tsx` 생성
-    - [ ] `getDetailCommon()` API 연동
-    - [ ] 관광지명 (대제목)
-    - [ ] 대표 이미지 (크게 표시)
-    - [ ] 주소 표시 및 복사 기능
-      - [ ] 클립보드 API 사용
-      - [ ] 복사 완료 토스트
-    - [ ] 전화번호 (클릭 시 전화 연결)
-    - [ ] 홈페이지 (링크)
-    - [ ] 개요 (긴 설명문)
-    - [ ] 관광 타입 및 카테고리 뱃지
-    - [ ] 정보 없는 항목 숨김 처리
+- [x] 기본 정보 섹션 (MVP 2.4.1)
+  - [x] `components/tour-detail/detail-info.tsx` 생성
+    - [x] `getDetailCommon()` API 연동
+    - [x] 관광지명 (대제목)
+    - [x] 대표 이미지 (크게 표시)
+    - [x] 주소 표시 및 복사 기능
+      - [x] 클립보드 API 사용
+      - [x] 복사 완료 토스트
+    - [x] 전화번호 (클릭 시 전화 연결)
+    - [x] 홈페이지 (링크)
+    - [x] 개요 (긴 설명문)
+    - [x] 관광 타입 및 카테고리 뱃지
+    - [x] 정보 없는 항목 숨김 처리
 - [ ] 운영 정보 섹션 (MVP 2.4.2)
   - [ ] `components/tour-detail/detail-intro.tsx` 생성
     - [ ] `getDetailIntro()` API 연동
