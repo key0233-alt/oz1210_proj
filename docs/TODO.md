@@ -557,14 +557,14 @@
   - [x] `app/not-found.tsx` 생성
     - [x] 사용자 친화적인 메시지
     - [x] 홈으로 돌아가기 버튼
-- [ ] SEO 최적화
-  - [ ] 메타태그 설정 (`app/layout.tsx`)
-    - [ ] 기본 title, description
-    - [ ] Open Graph 태그
-    - [ ] Twitter Card 태그
-  - [ ] `app/sitemap.ts` 생성
-    - [ ] 동적 sitemap 생성 (관광지 상세페이지 포함)
-  - [ ] `app/robots.ts` 생성
+- [x] SEO 최적화
+  - [x] 메타태그 설정 (`app/layout.tsx`)
+    - [x] 기본 title, description
+    - [x] Open Graph 태그
+    - [x] Twitter Card 태그
+  - [x] `app/sitemap.ts` 생성
+    - [x] 동적 sitemap 생성 (관광지 상세페이지 포함)
+  - [x] `app/robots.ts` 생성
 - [ ] 성능 최적화
   - [ ] Lighthouse 점수 측정 (목표: > 80)
   - [ ] 코드 분할 확인
