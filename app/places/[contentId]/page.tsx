@@ -10,9 +10,10 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getDetailCommon } from "@/lib/api/tour-api";
+import { getDetailCommon, getDetailIntro } from "@/lib/api/tour-api";
 import { Button } from "@/components/ui/button";
 import { DetailInfo } from "@/components/tour-detail/detail-info";
+import { DetailIntro } from "@/components/tour-detail/detail-intro";
 import { TourDetail } from "@/lib/types/tour";
 
 interface PlacePageProps {
@@ -77,6 +78,17 @@ export default async function PlacePage({ params }: PlacePageProps) {
 
   const detail: TourDetail = result.data;
 
+  // 운영 정보 조회 (contenttypeid 필요)
+  const contentTypeId = Number(detail.contenttypeid);
+  const introResult = await getDetailIntro(
+    contentId,
+    contentTypeId,
+    true
+  );
+
+  // 운영 정보는 없어도 페이지는 표시 (에러는 무시)
+  const intro = introResult.success ? introResult.data : null;
+
   return (
     <div className="min-h-screen bg-background">
       {/* 헤더 영역: 뒤로가기 버튼 */}
@@ -103,6 +115,9 @@ export default async function PlacePage({ params }: PlacePageProps) {
         <div className="mx-auto max-w-4xl space-y-8">
           {/* 기본 정보 섹션 */}
           <DetailInfo detail={detail} />
+
+          {/* 운영 정보 섹션 */}
+          <DetailIntro intro={intro} />
 
           {/* 추가 섹션들은 다음 단계에서 구현 */}
           <div className="text-center text-muted-foreground">
