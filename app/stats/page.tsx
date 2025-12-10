@@ -29,6 +29,7 @@ import { RegionChart } from "@/components/stats/region-chart";
 import { RegionChartSkeleton } from "@/components/stats/region-chart-skeleton";
 import { TypeChart } from "@/components/stats/type-chart";
 import { TypeChartSkeleton } from "@/components/stats/type-chart-skeleton";
+import { StatsError } from "@/components/stats/stats-error";
 
 export const metadata: Metadata = {
   title: "통계 대시보드 - My Trip",
@@ -55,10 +56,10 @@ async function StatsSummaryData() {
 
   if (!result.success || !result.data) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-        <p className="font-semibold text-destructive">오류 발생</p>
-        <p className="text-sm text-destructive/80">{result.error}</p>
-      </div>
+      <StatsError
+        message={result.error || "통계 요약 데이터를 불러오는데 실패했습니다."}
+        type="api"
+      />
     );
   }
 
@@ -73,10 +74,10 @@ async function RegionChartData() {
 
   if (!result.success || !result.data) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-        <p className="font-semibold text-destructive">오류 발생</p>
-        <p className="text-sm text-destructive/80">{result.error}</p>
-      </div>
+      <StatsError
+        message={result.error || "지역별 통계 데이터를 불러오는데 실패했습니다."}
+        type="api"
+      />
     );
   }
 
@@ -91,10 +92,10 @@ async function TypeChartData() {
 
   if (!result.success || !result.data) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-        <p className="font-semibold text-destructive">오류 발생</p>
-        <p className="text-sm text-destructive/80">{result.error}</p>
-      </div>
+      <StatsError
+        message={result.error || "타입별 통계 데이터를 불러오는데 실패했습니다."}
+        type="api"
+      />
     );
   }
 

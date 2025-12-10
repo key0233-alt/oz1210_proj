@@ -23,6 +23,7 @@
  * - @/lib/constants/tour-types: TOUR_CONTENT_TYPE_IDS, getContentTypeNameById
  */
 
+import { unstable_cache } from "next/cache";
 import { getAreaCode, getAreaBasedList } from "@/lib/api/tour-api";
 import type { RegionStats, TypeStats, StatsSummary } from "@/lib/types/stats";
 import type { ApiResult } from "@/lib/types/api";
@@ -33,11 +34,11 @@ import {
 import type { TourItem } from "@/lib/types/tour";
 
 /**
- * 지역별 관광지 개수 집계
+ * 지역별 관광지 개수 집계 (내부 구현)
  *
  * @returns 지역별 통계 정보 배열
  */
-export async function getRegionStats(): Promise<
+async function getRegionStatsInternal(): Promise<
   ApiResult<RegionStats[]>
 > {
   try {
@@ -126,13 +127,24 @@ export async function getRegionStats(): Promise<
 }
 
 /**
- * 관광 타입별 관광지 개수 집계
+ * 지역별 관광지 개수 집계 (캐싱 적용)
+ *
+ * @returns 지역별 통계 정보 배열
+ */
+export const getRegionStats = unstable_cache(
+  getRegionStatsInternal,
+  ["region-stats"],
+  { revalidate: 3600 } // 1시간마다 재검증
+);
+
+/**
+ * 관광 타입별 관광지 개수 집계 (내부 구현)
  *
  * 전체 지역을 조회하기 위해 각 지역별로 조회한 후 합산합니다.
  *
  * @returns 타입별 통계 정보 배열
  */
-export async function getTypeStats(): Promise<ApiResult<TypeStats[]>> {
+async function getTypeStatsInternal(): Promise<ApiResult<TypeStats[]>> {
   try {
     // 1. 전체 시/도 목록 조회 (지역별 합산을 위해 필요)
     const areaCodeResult = await getAreaCode(undefined, true);
@@ -226,18 +238,29 @@ export async function getTypeStats(): Promise<ApiResult<TypeStats[]>> {
 }
 
 /**
- * 전체 통계 요약 정보 생성
+ * 관광 타입별 관광지 개수 집계 (캐싱 적용)
+ *
+ * @returns 타입별 통계 정보 배열
+ */
+export const getTypeStats = unstable_cache(
+  getTypeStatsInternal,
+  ["type-stats"],
+  { revalidate: 3600 } // 1시간마다 재검증
+);
+
+/**
+ * 전체 통계 요약 정보 생성 (내부 구현)
  *
  * @returns 통계 요약 정보
  */
-export async function getStatsSummary(): Promise<
+async function getStatsSummaryInternal(): Promise<
   ApiResult<StatsSummary>
 > {
   try {
     // 1. 지역별 및 타입별 통계 병렬 조회
     const [regionResult, typeResult] = await Promise.all([
-      getRegionStats(),
-      getTypeStats(),
+      getRegionStatsInternal(),
+      getTypeStatsInternal(),
     ]);
 
     // 2. 에러 처리
@@ -286,4 +309,15 @@ export async function getStatsSummary(): Promise<
     };
   }
 }
+
+/**
+ * 전체 통계 요약 정보 생성 (캐싱 적용)
+ *
+ * @returns 통계 요약 정보
+ */
+export const getStatsSummary = unstable_cache(
+  getStatsSummaryInternal,
+  ["stats-summary"],
+  { revalidate: 3600 } // 1시간마다 재검증
+);
 
