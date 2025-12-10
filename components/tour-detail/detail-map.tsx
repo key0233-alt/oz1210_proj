@@ -246,7 +246,7 @@ export function DetailMap({ detail, className }: DetailMapProps) {
 
   return (
     <section className={cn("space-y-4", className)} aria-label="지도">
-      <h3 className="text-xl font-semibold">위치</h3>
+      <h2 className="text-2xl font-bold">위치</h2>
       <div
         className="relative w-full h-[300px] md:h-[400px] rounded-lg overflow-hidden bg-muted"
         role="application"

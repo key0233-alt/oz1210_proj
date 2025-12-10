@@ -108,7 +108,7 @@ export function DetailIntro({ intro }: DetailIntroProps) {
 
   return (
     <section className="space-y-4" aria-label="운영 정보">
-      <h3 className="text-2xl font-bold">운영 정보</h3>
+      <h2 className="text-2xl font-bold">운영 정보</h2>
 
       <div className="space-y-3">
         {/* 운영시간 */}

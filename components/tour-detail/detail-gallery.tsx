@@ -37,7 +37,7 @@ export async function DetailGallery({
 
   return (
     <section className="space-y-4" aria-label="이미지 갤러리">
-      <h3 className="text-xl font-semibold">이미지 갤러리</h3>
+      <h2 className="text-2xl font-bold">이미지 갤러리</h2>
       <GalleryClient images={images} title={title} />
     </section>
   );
