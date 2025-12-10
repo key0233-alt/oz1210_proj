@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
       { hostname: "images.unsplash.com" },
     ],
   },
+  // 패키지 최적화 설정
+  experimental: {
+    // 아이콘 라이브러리 최적화 (lucide-react는 이미 트리 쉐이킹 지원)
+    optimizePackageImports: ["lucide-react", "recharts"],
+  },
 };
 
-export default nextConfig;
+// 번들 분석기 설정 (ANALYZE=true일 때만 활성화)
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default withBundleAnalyzer(nextConfig);

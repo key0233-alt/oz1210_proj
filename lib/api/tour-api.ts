@@ -6,6 +6,7 @@
  * 공통 파라미터 처리, 에러 처리, 재시도 로직을 포함합니다.
  */
 
+import { unstable_cache } from "next/cache";
 import { getEnv, getServerEnv } from "@/lib/env";
 import { TOUR_API_BASE_URL, TOUR_API_DEFAULTS, API_RETRY_CONFIG } from "@/lib/constants/api";
 import type {
@@ -230,13 +231,13 @@ function parseApiResponse<T>(
 }
 
 /**
- * 지역코드 조회
+ * 지역코드 조회 (내부 구현)
  *
  * @param areaCode 시/도 코드 (선택사항, 없으면 전체 시/도 조회)
  * @param isServer 서버 사이드 호출 여부
  * @returns 지역 코드 목록
  */
-export async function getAreaCode(
+async function getAreaCodeInternal(
   areaCode?: string,
   isServer: boolean = false
 ): Promise<ApiResult<TourItem[]>> {
@@ -264,7 +265,34 @@ export async function getAreaCode(
 }
 
 /**
- * 지역 기반 관광지 목록 조회
+ * 지역코드 조회 (캐싱 적용)
+ *
+ * 지역 코드는 거의 변경되지 않으므로 24시간 캐싱을 적용합니다.
+ *
+ * @param areaCode 시/도 코드 (선택사항, 없으면 전체 시/도 조회)
+ * @param isServer 서버 사이드 호출 여부
+ * @returns 지역 코드 목록
+ */
+export async function getAreaCode(
+  areaCode?: string,
+  isServer: boolean = false
+): Promise<ApiResult<TourItem[]>> {
+  // 서버 사이드에서만 캐싱 적용 (클라이언트에서는 캐싱 불가)
+  if (isServer) {
+    return unstable_cache(
+      async () => getAreaCodeInternal(areaCode, isServer),
+      [`area-code-${areaCode || "all"}`],
+      {
+        revalidate: 86400, // 24시간 (지역 코드는 거의 변경되지 않음)
+        tags: ["area-code"],
+      }
+    )();
+  }
+  return getAreaCodeInternal(areaCode, isServer);
+}
+
+/**
+ * 지역 기반 관광지 목록 조회 (내부 구현)
  *
  * @param areaCode 지역 코드
  * @param contentTypeId 콘텐츠 타입 ID (선택사항)
@@ -273,7 +301,7 @@ export async function getAreaCode(
  * @param isServer 서버 사이드 호출 여부
  * @returns 관광지 목록
  */
-export async function getAreaBasedList(
+async function getAreaBasedListInternal(
   areaCode: string,
   contentTypeId?: number,
   numOfRows: number = 20,
@@ -304,6 +332,54 @@ export async function getAreaBasedList(
       error: errorInfo.message || "관광지 목록 조회 중 오류가 발생했습니다.",
     };
   }
+}
+
+/**
+ * 지역 기반 관광지 목록 조회 (캐싱 적용)
+ *
+ * 관광지 목록은 자주 변경되지 않으므로 1시간 캐싱을 적용합니다.
+ *
+ * @param areaCode 지역 코드
+ * @param contentTypeId 콘텐츠 타입 ID (선택사항)
+ * @param numOfRows 페이지당 항목 수 (기본값: 20)
+ * @param pageNo 페이지 번호 (기본값: 1)
+ * @param isServer 서버 사이드 호출 여부
+ * @returns 관광지 목록
+ */
+export async function getAreaBasedList(
+  areaCode: string,
+  contentTypeId?: number,
+  numOfRows: number = 20,
+  pageNo: number = 1,
+  isServer: boolean = false
+): Promise<ApiResult<TourItem[]>> {
+  // 서버 사이드에서만 캐싱 적용 (클라이언트에서는 캐싱 불가)
+  if (isServer) {
+    // 캐시 키 생성 (모든 파라미터 포함)
+    const cacheKey = `area-based-list-${areaCode}-${contentTypeId || "all"}-${numOfRows}-${pageNo}`;
+    return unstable_cache(
+      async () =>
+        getAreaBasedListInternal(
+          areaCode,
+          contentTypeId,
+          numOfRows,
+          pageNo,
+          isServer
+        ),
+      [cacheKey],
+      {
+        revalidate: 3600, // 1시간 (관광지 목록은 자주 변경되지 않음)
+        tags: ["area-based-list"],
+      }
+    )();
+  }
+  return getAreaBasedListInternal(
+    areaCode,
+    contentTypeId,
+    numOfRows,
+    pageNo,
+    isServer
+  );
 }
 
 /**
@@ -353,13 +429,13 @@ export async function searchKeyword(
 }
 
 /**
- * 관광지 공통 정보 조회
+ * 관광지 공통 정보 조회 (내부 구현)
  *
  * @param contentId 콘텐츠 ID
  * @param isServer 서버 사이드 호출 여부
  * @returns 관광지 상세 정보
  */
-export async function getDetailCommon(
+async function getDetailCommonInternal(
   contentId: string,
   isServer: boolean = false
 ): Promise<ApiResult<TourDetail>> {
@@ -384,6 +460,33 @@ export async function getDetailCommon(
       error: errorInfo.message || "관광지 상세 정보 조회 중 오류가 발생했습니다.",
     };
   }
+}
+
+/**
+ * 관광지 공통 정보 조회 (캐싱 적용)
+ *
+ * 상세 정보는 변경 빈도가 낮으므로 1시간 캐싱을 적용합니다.
+ *
+ * @param contentId 콘텐츠 ID
+ * @param isServer 서버 사이드 호출 여부
+ * @returns 관광지 상세 정보
+ */
+export async function getDetailCommon(
+  contentId: string,
+  isServer: boolean = false
+): Promise<ApiResult<TourDetail>> {
+  // 서버 사이드에서만 캐싱 적용 (클라이언트에서는 캐싱 불가)
+  if (isServer) {
+    return unstable_cache(
+      async () => getDetailCommonInternal(contentId, isServer),
+      [`detail-common-${contentId}`],
+      {
+        revalidate: 3600, // 1시간 (상세 정보는 변경 빈도가 낮음)
+        tags: ["detail-common"],
+      }
+    )();
+  }
+  return getDetailCommonInternal(contentId, isServer);
 }
 
 /**
