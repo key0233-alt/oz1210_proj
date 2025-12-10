@@ -44,6 +44,73 @@ function getDelayMs(retryCount: number): number {
 }
 
 /**
+ * 에러 타입 분류
+ */
+function classifyError(error: unknown): {
+  type: "network" | "api" | "parse" | "unknown";
+  message: string;
+  statusCode?: number;
+} {
+  // 네트워크 에러 (fetch 실패, 타임아웃 등)
+  if (error instanceof TypeError && error.message.includes("fetch")) {
+    return {
+      type: "network",
+      message: "네트워크 연결에 실패했습니다. 인터넷 연결을 확인해주세요.",
+    };
+  }
+
+  // HTTP 에러
+  if (error instanceof Error && error.message.includes("HTTP")) {
+    const statusMatch = error.message.match(/HTTP (\d+)/);
+    const statusCode = statusMatch ? parseInt(statusMatch[1], 10) : undefined;
+
+    let message = "서버에서 오류가 발생했습니다.";
+    if (statusCode === 400) {
+      message = "잘못된 요청입니다. 입력값을 확인해주세요.";
+    } else if (statusCode === 401) {
+      message = "인증이 필요합니다. API 키를 확인해주세요.";
+    } else if (statusCode === 403) {
+      message = "접근이 거부되었습니다. 권한을 확인해주세요.";
+    } else if (statusCode === 404) {
+      message = "요청한 리소스를 찾을 수 없습니다.";
+    } else if (statusCode === 429) {
+      message = "요청 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요.";
+    } else if (statusCode === 500) {
+      message = "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+    } else if (statusCode === 503) {
+      message = "서비스를 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해주세요.";
+    }
+
+    return {
+      type: "api",
+      message,
+      statusCode,
+    };
+  }
+
+  // JSON 파싱 에러
+  if (error instanceof SyntaxError) {
+    return {
+      type: "parse",
+      message: "서버 응답을 처리하는 중 오류가 발생했습니다.",
+    };
+  }
+
+  // 기타 에러
+  const errorMessage =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : "알 수 없는 오류가 발생했습니다.";
+
+  return {
+    type: "unknown",
+    message: errorMessage,
+  };
+}
+
+/**
  * API 호출 재시도 로직
  */
 async function fetchWithRetry<T>(
@@ -54,22 +121,52 @@ async function fetchWithRetry<T>(
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const errorInfo = classifyError(
+        new Error(`HTTP ${response.status}: ${response.statusText}`)
+      );
+      const error = new Error(errorInfo.message);
+      (error as any).statusCode = errorInfo.statusCode;
+      (error as any).errorType = errorInfo.type;
+      throw error;
     }
 
     const data = (await response.json()) as T;
     return data;
   } catch (error) {
-    if (retryCount < API_RETRY_CONFIG.maxRetries) {
+    // 네트워크 에러나 일시적 서버 에러인 경우에만 재시도
+    const errorInfo = classifyError(error);
+    const shouldRetry =
+      retryCount < API_RETRY_CONFIG.maxRetries &&
+      (errorInfo.type === "network" ||
+        (errorInfo.type === "api" &&
+          errorInfo.statusCode &&
+          errorInfo.statusCode >= 500));
+
+    if (shouldRetry) {
       const delay = getDelayMs(retryCount);
-      console.warn(
-        `API 호출 실패 (재시도 ${retryCount + 1}/${API_RETRY_CONFIG.maxRetries}):`,
-        error
-      );
+      // 개발 환경에서만 상세 로깅
+      if (process.env.NODE_ENV === "development") {
+        console.warn(
+          `API 호출 실패 (재시도 ${retryCount + 1}/${API_RETRY_CONFIG.maxRetries}):`,
+          errorInfo.type,
+          errorInfo.message,
+          error
+        );
+      }
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry<T>(url, retryCount + 1);
     }
-    throw error;
+
+    // 재시도 불가능한 경우 에러 정보를 포함하여 throw
+    const finalError =
+      error instanceof Error
+        ? error
+        : new Error(errorInfo.message);
+    (finalError as any).errorType = errorInfo.type;
+    if (errorInfo.statusCode) {
+      (finalError as any).statusCode = errorInfo.statusCode;
+    }
+    throw finalError;
   }
 }
 
@@ -82,10 +179,33 @@ function parseApiResponse<T>(
   const { response } = data;
 
   if (response.header.resultCode !== "0000") {
+    // 한국관광공사 API 에러 코드별 사용자 친화적 메시지
+    const errorCode = response.header.resultCode;
+    let userMessage = response.header.resultMsg || "API 호출 중 오류가 발생했습니다.";
+
+    // 에러 코드별 메시지 개선 (한국어)
+    if (errorCode === "01") {
+      userMessage = "필수 파라미터가 누락되었습니다.";
+    } else if (errorCode === "02") {
+      userMessage = "잘못된 파라미터 값입니다.";
+    } else if (errorCode === "03") {
+      userMessage = "서비스키가 유효하지 않습니다.";
+    } else if (errorCode === "04") {
+      userMessage = "서비스키가 만료되었습니다.";
+    } else if (errorCode === "05") {
+      userMessage = "일일 호출 한도를 초과했습니다.";
+    }
+
+    // 개발 환경에서만 원본 메시지 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("API 에러 코드:", errorCode);
+      console.error("API 에러 메시지:", response.header.resultMsg);
+    }
+
     return {
       success: false,
-      error: response.header.resultMsg,
-      code: response.header.resultCode,
+      error: userMessage,
+      code: errorCode,
     };
   }
 
@@ -93,7 +213,7 @@ function parseApiResponse<T>(
   if (!items) {
     return {
       success: false,
-      error: "응답 데이터가 없습니다.",
+      error: "조회된 데이터가 없습니다.",
     };
   }
 
@@ -131,12 +251,14 @@ export async function getAreaCode(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("지역코드 조회 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "지역코드 조회 중 오류가 발생했습니다.",
+      error: errorInfo.message || "지역코드 조회 중 오류가 발생했습니다.",
     };
   }
 }
@@ -172,12 +294,14 @@ export async function getAreaBasedList(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("관광지 목록 조회 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "관광지 목록 조회 중 오류가 발생했습니다.",
+      error: errorInfo.message || "관광지 목록 조회 중 오류가 발생했습니다.",
     };
   }
 }
@@ -216,12 +340,14 @@ export async function searchKeyword(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("키워드 검색 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "키워드 검색 중 오류가 발생했습니다.",
+      error: errorInfo.message || "키워드 검색 중 오류가 발생했습니다.",
     };
   }
 }
@@ -248,12 +374,14 @@ export async function getDetailCommon(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("관광지 상세 정보 조회 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "관광지 상세 정보 조회 중 오류가 발생했습니다.",
+      error: errorInfo.message || "관광지 상세 정보 조회 중 오류가 발생했습니다.",
     };
   }
 }
@@ -283,12 +411,14 @@ export async function getDetailIntro(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("운영 정보 조회 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "운영 정보 조회 중 오류가 발생했습니다.",
+      error: errorInfo.message || "운영 정보 조회 중 오류가 발생했습니다.",
     };
   }
 }
@@ -315,12 +445,14 @@ export async function getDetailImage(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("이미지 목록 조회 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "이미지 목록 조회 중 오류가 발생했습니다.",
+      error: errorInfo.message || "이미지 목록 조회 중 오류가 발생했습니다.",
     };
   }
 }
@@ -347,12 +479,14 @@ export async function getDetailPetTour(
 
     return parseApiResponse(data);
   } catch (error) {
+    const errorInfo = classifyError(error);
+    // 개발 환경에서만 상세 로깅
+    if (process.env.NODE_ENV === "development") {
+      console.error("반려동물 정보 조회 에러:", errorInfo, error);
+    }
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "반려동물 정보 조회 중 오류가 발생했습니다.",
+      error: errorInfo.message || "반려동물 정보 조회 중 오류가 발생했습니다.",
     };
   }
 }
