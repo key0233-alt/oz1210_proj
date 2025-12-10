@@ -8,6 +8,7 @@
 
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getDetailCommon, getDetailIntro } from "@/lib/api/tour-api";
@@ -16,6 +17,8 @@ import { DetailInfo } from "@/components/tour-detail/detail-info";
 import { DetailIntro } from "@/components/tour-detail/detail-intro";
 import { DetailGallery } from "@/components/tour-detail/detail-gallery";
 import { DetailMap } from "@/components/tour-detail/detail-map";
+import { ShareButton } from "@/components/tour-detail/share-button";
+import { BookmarkButton } from "@/components/bookmarks/bookmark-button";
 import { TourDetail } from "@/lib/types/tour";
 
 interface PlacePageProps {
@@ -44,14 +47,31 @@ export async function generateMetadata({
   const description =
     detail.overview?.substring(0, 100).replace(/\s+/g, " ") || "관광지 상세 정보";
 
+  // 절대 URL 생성 (headers를 통해 호스트 정보 가져오기)
+  const headersList = await headers();
+  const host = headersList.get("host") || "";
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
+  const absoluteUrl = `${baseUrl}/places/${contentId}`;
+
+  // 이미지 최적화 (1200x630 권장 크기)
+  const ogImage = detail.firstimage
+    ? {
+        url: detail.firstimage,
+        width: 1200,
+        height: 630,
+        alt: detail.title,
+      }
+    : undefined;
+
   return {
     title: `${detail.title} - My Trip`,
     description,
     openGraph: {
       title: detail.title,
       description,
-      images: detail.firstimage ? [{ url: detail.firstimage }] : [],
-      url: `/places/${contentId}`,
+      images: ogImage ? [ogImage] : [],
+      url: absoluteUrl,
       type: "website",
       locale: "ko_KR",
     },
@@ -93,7 +113,7 @@ export default async function PlacePage({ params }: PlacePageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* 헤더 영역: 뒤로가기 버튼 */}
+      {/* 헤더 영역: 뒤로가기 버튼 및 공유 버튼 */}
       <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center gap-4 px-4">
           <Link href="/">
@@ -106,9 +126,13 @@ export default async function PlacePage({ params }: PlacePageProps) {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <h1 className="truncate text-lg font-semibold md:text-xl">
+          <h1 className="flex-1 truncate text-lg font-semibold md:text-xl">
             {detail.title}
           </h1>
+          <div className="flex items-center gap-2">
+            <BookmarkButton contentId={contentId} />
+            <ShareButton contentId={contentId} />
+          </div>
         </div>
       </header>
 
