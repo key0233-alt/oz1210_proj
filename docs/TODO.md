@@ -169,12 +169,19 @@
   - [x] 반응형 레이아웃
     - [x] 데스크톱: 리스트(좌측 50%) + 지도(우측 50%) 분할
     - [x] 모바일: 탭 형태로 리스트/지도 전환
-- [ ] 페이지네이션
-  - [ ] 무한 스크롤 구현
-    - [ ] Intersection Observer 사용
-    - [ ] 하단 로딩 인디케이터
-    - [ ] 페이지당 10-20개 항목
-  - [ ] 또는 페이지 번호 선택 방식
+- [x] 페이지네이션
+  - [x] 무한 스크롤 구현
+    - [x] Intersection Observer 사용 (`hooks/use-infinite-scroll.ts`)
+    - [x] 하단 로딩 인디케이터
+    - [x] 페이지당 20개 항목 (PAGINATION_DEFAULTS.numOfRows)
+  - [x] 페이지 번호 선택 방식 (`components/tour-pagination.tsx`)
+    - [x] 이전/다음 버튼
+    - [x] 페이지 번호 표시 (최대 10개)
+    - [x] 첫 페이지/마지막 페이지 이동
+    - [x] 모드 전환 기능 (무한 스크롤 ↔ 페이지 번호)
+  - [x] API 응답에 totalCount 추가 (`lib/types/api.ts`, `lib/api/tour-api.ts`)
+  - [x] HomeLayout에 페이지네이션 통합
+  - [x] 접근성 개선 (ARIA 라벨, 키보드 네비게이션)
 - [ ] 최종 통합 및 스타일링
   - [ ] 모든 기능 통합 테스트
   - [ ] 반응형 디자인 확인 (모바일/태블릿/데스크톱)

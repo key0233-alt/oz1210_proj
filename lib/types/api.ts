@@ -39,6 +39,6 @@ export interface TourApiError {
  * API 호출 결과 타입
  */
 export type ApiResult<T> =
-  | { success: true; data: T }
+  | { success: true; data: T; totalCount?: number }
   | { success: false; error: string; code?: string };
 

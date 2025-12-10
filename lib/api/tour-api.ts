@@ -105,6 +105,7 @@ function parseApiResponse<T>(
     data: (itemArray.length === 1 && !Array.isArray(items)
       ? items
       : itemArray) as T extends Array<infer U> ? U[] : T,
+    totalCount: response.body.totalCount,
   };
 }
 

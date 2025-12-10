@@ -61,6 +61,7 @@ async function TourListData({
   let allTours: TourItem[] = [];
   let hasError = false;
   let errorMessage: string | null = null;
+  let totalCount = 0;
 
   // 검색 모드: keyword가 있으면 searchKeyword API 사용
   if (keyword && keyword.trim()) {
@@ -86,11 +87,14 @@ async function TourListData({
           error={result.error || "검색 중 오류가 발생했습니다."}
           searchKeyword={trimmedKeyword}
           areaCode={finalAreaCode}
+          totalCount={0}
+          currentPage={finalPageNo}
         />
       );
     }
 
     allTours = result.data || [];
+    totalCount = result.totalCount || allTours.length;
   } else {
     // 일반 모드: 기존 getAreaBasedList 로직
     // 다중 타입 선택 처리
@@ -112,6 +116,10 @@ async function TourListData({
     for (const result of results) {
       if (result.success && result.data) {
         allTours.push(...result.data);
+        // totalCount는 첫 번째 성공한 결과에서 가져오거나 합산
+        if (result.totalCount) {
+          totalCount = Math.max(totalCount, result.totalCount);
+        }
       } else {
         hasError = true;
         errorMessage = result.error || "일부 관광지 목록을 불러오는 중 오류가 발생했습니다.";
@@ -123,6 +131,10 @@ async function TourListData({
       new Map(allTours.map((tour) => [tour.contentid, tour])).values()
     );
     allTours = uniqueTours;
+    // 중복 제거 후 실제 개수로 조정 (정확하지 않을 수 있음)
+    if (totalCount === 0) {
+      totalCount = allTours.length;
+    }
   } else {
     // 단일 타입 또는 타입 미선택
     const result = await getAreaBasedList(
@@ -140,11 +152,14 @@ async function TourListData({
           isLoading={false}
           error={result.error || "관광지 목록을 불러오는 중 오류가 발생했습니다."}
           areaCode={finalAreaCode}
+          totalCount={0}
+          currentPage={finalPageNo}
         />
       );
     }
 
     allTours = result.data || [];
+    totalCount = result.totalCount || allTours.length;
     }
   }
 
@@ -169,6 +184,8 @@ async function TourListData({
         isLoading={false}
         error={errorMessage || "관광지 목록을 불러오는 중 오류가 발생했습니다."}
         areaCode={finalAreaCode}
+        totalCount={0}
+        currentPage={finalPageNo}
       />
     );
   }
@@ -181,6 +198,8 @@ async function TourListData({
       error={hasError ? errorMessage : null}
       searchKeyword={keyword?.trim() || undefined}
       areaCode={finalAreaCode}
+      totalCount={totalCount}
+      currentPage={finalPageNo}
     />
   );
 }
