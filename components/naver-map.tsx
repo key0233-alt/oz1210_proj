@@ -27,7 +27,8 @@ import { katecToWgs84 } from "@/lib/utils/coordinates";
 import { getRegionCenter, getRegionZoom } from "@/lib/constants/map";
 import { getEnv } from "@/lib/env";
 import { cn } from "@/lib/utils";
-import { Loader2, MapPin, Navigation } from "lucide-react";
+import { getMarkerColorByTypeId } from "@/lib/constants/tour-types";
+import { Loader2, MapPin, Navigation, Locate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Naver Maps API 타입 정의
@@ -42,6 +43,8 @@ interface NaverMapProps {
   tours: TourItem[];
   /** 선택된 관광지 ID (리스트에서 선택된 항목) */
   selectedContentId?: string;
+  /** 호버된 관광지 ID (리스트에서 호버된 항목) */
+  hoveredContentId?: string;
   /** 마커 클릭 시 콜백 */
   onMarkerClick?: (contentId: string) => void;
   /** 초기 중심 좌표를 위한 지역 코드 */
@@ -143,6 +146,7 @@ function loadNaverMapsScript(): Promise<void> {
 export function NaverMap({
   tours,
   selectedContentId,
+  hoveredContentId,
   onMarkerClick,
   areaCode,
   className,
@@ -254,6 +258,16 @@ export function NaverMap({
 
     // 새 마커 생성
     tourCoordinates.forEach(({ tour, coords }) => {
+      // 관광 타입별 마커 색상 가져오기
+      const markerColor = getMarkerColorByTypeId(tour.contenttypeid);
+      const isHovered = hoveredContentId === tour.contentid;
+      const isSelected = selectedContentId === tour.contentid;
+      
+      // 호버되거나 선택된 경우 마커 크기 및 스타일 변경
+      const markerSize = isHovered || isSelected ? 40 : 32;
+      const borderWidth = isHovered || isSelected ? 3 : 2;
+      const shadowSize = isHovered || isSelected ? "0 4px 8px" : "0 2px 4px";
+      
       const marker = new window.naver.maps.Marker({
         position: new window.naver.maps.LatLng(coords.lat, coords.lng),
         map,
@@ -261,26 +275,27 @@ export function NaverMap({
         icon: {
           content: `
             <div style="
-              width: 32px;
-              height: 32px;
-              background-color: #3b82f6;
-              border: 2px solid white;
+              width: ${markerSize}px;
+              height: ${markerSize}px;
+              background-color: ${markerColor};
+              border: ${borderWidth}px solid white;
               border-radius: 50%;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              box-shadow: ${shadowSize} rgba(0,0,0,0.4);
               display: flex;
               align-items: center;
               justify-content: center;
               cursor: pointer;
+              transition: all 0.2s ease;
             ">
               <div style="
-                width: 12px;
-                height: 12px;
+                width: ${markerSize * 0.375}px;
+                height: ${markerSize * 0.375}px;
                 background-color: white;
                 border-radius: 50%;
               "></div>
             </div>
           `,
-          anchor: new window.naver.maps.Point(16, 16),
+          anchor: new window.naver.maps.Point(markerSize / 2, markerSize / 2),
         },
       });
 
@@ -365,7 +380,7 @@ export function NaverMap({
 
       markersRef.current.push(marker);
     });
-  }, [tourCoordinates, router, onMarkerClick]);
+  }, [tourCoordinates, router, onMarkerClick, hoveredContentId, selectedContentId]);
 
   // 선택된 관광지로 지도 이동
   useEffect(() => {
@@ -477,6 +492,32 @@ export function NaverMap({
     );
   }, [mapType]);
 
+  // 현재 위치로 이동 핸들러
+  const handleCurrentLocation = useCallback(() => {
+    if (!mapInstanceRef.current || !window.naver?.maps) return;
+
+    if (!navigator.geolocation) {
+      alert("이 브라우저는 위치 서비스를 지원하지 않습니다.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const map = mapInstanceRef.current;
+        if (!map) return;
+
+        const location = new window.naver.maps.LatLng(latitude, longitude);
+        map.setCenter(location);
+        map.setZoom(15);
+      },
+      (error) => {
+        console.error("위치 정보를 가져올 수 없습니다:", error);
+        alert("위치 정보를 가져올 수 없습니다. 위치 권한을 확인해주세요.");
+      }
+    );
+  }, []);
+
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
     return () => {
@@ -550,6 +591,18 @@ export function NaverMap({
       {/* 지도 컨트롤 */}
       {!isLoading && !error && (
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+          {/* 현재 위치 버튼 */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleCurrentLocation}
+            className="bg-background/90 backdrop-blur-sm shadow-md"
+            aria-label="현재 위치로 이동"
+            title="현재 위치로 이동"
+          >
+            <Locate className="h-4 w-4" />
+          </Button>
           {/* 지도 유형 선택 버튼 */}
           <Button
             type="button"
@@ -557,6 +610,8 @@ export function NaverMap({
             size="sm"
             onClick={handleMapTypeToggle}
             className="bg-background/90 backdrop-blur-sm shadow-md"
+            aria-label="지도 유형 전환"
+            title={mapType === "normal" ? "위성 지도로 전환" : "일반 지도로 전환"}
           >
             {mapType === "normal" ? "위성" : "일반"}
           </Button>

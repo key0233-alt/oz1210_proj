@@ -53,6 +53,7 @@ export function HomeLayout({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedContentId, setSelectedContentId] = useState<string | undefined>();
+  const [hoveredContentId, setHoveredContentId] = useState<string | undefined>();
   const [paginationMode, setPaginationMode] = useState<PaginationMode>("infinite");
 
   // 페이지 변경 핸들러
@@ -110,6 +111,16 @@ export function HomeLayout({
     router.refresh();
   }, [router]);
 
+  // 카드 호버 핸들러 (지도 마커 강조)
+  const handleCardHover = useCallback((contentId: string) => {
+    setHoveredContentId(contentId);
+  }, []);
+
+  // 카드 호버 해제 핸들러
+  const handleCardHoverLeave = useCallback(() => {
+    setHoveredContentId(undefined);
+  }, []);
+
   return (
     <>
       {/* 데스크톱 레이아웃: 분할 (≥1024px) */}
@@ -124,6 +135,8 @@ export function HomeLayout({
               searchKeyword={searchKeyword}
               selectedContentId={selectedContentId}
               onCardClick={handleCardClick}
+              onCardHover={handleCardHover}
+              onCardHoverLeave={handleCardHoverLeave}
               onRetry={handleRetry}
             />
           </div>
@@ -149,6 +162,7 @@ export function HomeLayout({
           <NaverMap
             tours={tours}
             selectedContentId={selectedContentId}
+            hoveredContentId={hoveredContentId}
             onMarkerClick={handleMarkerClick}
             areaCode={areaCode}
             className="h-full"
