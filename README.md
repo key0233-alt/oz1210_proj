@@ -213,10 +213,28 @@ pnpm install
 cp .env.example .env
 ```
 
-**6-3. Supabase 환경 변수 설정**
+**6-3. 한국관광공사 API 환경 변수 설정**
+
+1. [한국관광공사 공공데이터포털](https://www.data.go.kr/data/15101578/openapi.do)에서 API 키 발급
+2. 다음 값들을 `.env.local` 파일에 입력:
+   ```env
+   NEXT_PUBLIC_TOUR_API_KEY="<한국관광공사 API 키>"
+   TOUR_API_KEY="<한국관광공사 API 키 (서버 전용)>"
+   ```
+
+**6-4. 네이버 지도 API 환경 변수 설정**
+
+1. [네이버 클라우드 플랫폼](https://www.ncloud.com/)에서 Maps API 서비스 활성화
+2. 클라이언트 ID 발급 (신용카드 등록 필요)
+3. 다음 값을 `.env.local` 파일에 입력:
+   ```env
+   NEXT_PUBLIC_NAVER_MAP_CLIENT_ID="<네이버 지도 클라이언트 ID>"
+   ```
+
+**6-5. Supabase 환경 변수 설정**
 
 1. Supabase Dashboard → **Settings** → **API**
-2. 다음 값들을 복사하여 `.env` 파일에 입력:
+2. 다음 값들을 복사하여 `.env.local` 파일에 입력:
    ```env
    NEXT_PUBLIC_SUPABASE_URL="<Project URL>"
    NEXT_PUBLIC_SUPABASE_ANON_KEY="<anon public key>"
@@ -226,10 +244,10 @@ cp .env.example .env
 
 > **⚠️ 주의**: `service_role` 키는 모든 RLS를 우회하는 관리자 권한이므로 절대 공개하지 마세요!
 
-**6-4. Clerk 환경 변수 설정**
+**6-6. Clerk 환경 변수 설정**
 
 1. Clerk Dashboard → **API Keys**
-2. 다음 값들을 복사하여 `.env` 파일에 입력:
+2. 다음 값들을 복사하여 `.env.local` 파일에 입력:
    ```env
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="<Publishable Key>"
    CLERK_SECRET_KEY="<Secret Key>"

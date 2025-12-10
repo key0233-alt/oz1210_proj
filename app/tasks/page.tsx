@@ -16,7 +16,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSession, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useClerkSupabaseClient } from "@/lib/supabase/clerk-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,6 @@ export default function TasksPage() {
 
   // Clerk 인증 상태 확인
   const { user } = useUser();
-  const { session } = useSession();
 
   // Clerk 토큰을 사용하는 Supabase 클라이언트 생성
   const supabase = useClerkSupabaseClient();
