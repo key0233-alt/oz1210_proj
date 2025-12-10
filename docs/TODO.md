@@ -410,19 +410,20 @@
     - [x] 로딩 상태 (Skeleton UI - `stats-summary-skeleton.tsx`)
     - [x] 카드 레이아웃 디자인 (반응형 그리드: 모바일 1열, 태블릿 2열, 데스크톱 4열)
     - [x] `app/stats/page.tsx`에 통합 (Suspense로 로딩 처리)
-- [ ] 지역별 분포 차트 (Bar Chart)
-  - [ ] `components/stats/region-chart.tsx` 생성
-    - [ ] shadcn/ui Chart 컴포넌트 설치 (Bar)
-    - [ ] recharts 기반 Bar Chart 구현
-    - [ ] X축: 지역명 (서울, 부산, 제주 등)
-    - [ ] Y축: 관광지 개수
-    - [ ] 상위 10개 지역 표시 (또는 전체)
-    - [ ] 바 클릭 시 해당 지역 목록 페이지로 이동
-    - [ ] 호버 시 정확한 개수 표시
-    - [ ] 다크/라이트 모드 지원
-    - [ ] 반응형 디자인
-    - [ ] 로딩 상태
-    - [ ] 접근성 (ARIA 라벨, 키보드 네비게이션)
+- [x] 지역별 분포 차트 (Bar Chart)
+  - [x] `components/stats/region-chart.tsx` 생성
+    - [x] shadcn/ui Chart 컴포넌트 설치 (Bar) - pnpx shadcn@latest add chart
+    - [x] recharts 기반 Bar Chart 구현 (Client Component)
+    - [x] X축: 지역명 (서울, 부산, 제주 등, -45도 회전)
+    - [x] Y축: 관광지 개수
+    - [x] 상위 10개 지역 표시
+    - [x] 바 클릭 시 해당 지역 목록 페이지로 이동 (/?areaCode={areaCode})
+    - [x] 호버 시 정확한 개수 표시 (ChartTooltip 사용)
+    - [x] 다크/라이트 모드 지원 (chart-1 색상 사용)
+    - [x] 반응형 디자인 (모바일 300px, 데스크톱 400px 높이)
+    - [x] 로딩 상태 (region-chart-skeleton.tsx)
+    - [x] 접근성 (ARIA 라벨, 키보드 네비게이션)
+    - [x] `app/stats/page.tsx`에 통합 (Suspense로 로딩 처리)
 - [ ] 타입별 분포 차트 (Donut Chart)
   - [ ] `components/stats/type-chart.tsx` 생성
     - [ ] shadcn/ui Chart 컴포넌트 설치 (Pie/Donut)
